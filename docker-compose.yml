@@ -12,6 +12,11 @@ services:
       - db-users-data:/var/lib/postgresql/data
     networks:
       - ilia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db-transactions:
     image: postgres:15-alpine
@@ -26,6 +31,11 @@ services:
       - db-transactions-data:/var/lib/postgresql/data
     networks:
       - ilia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ms-users:
     build:
@@ -37,15 +47,20 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db-users:5432/users_db
       JWT_SECRET: ILIACHALLENGE
       JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
+      NODE_ENV: production
     ports:
       - "3002:3002"
     depends_on:
-      - db-users
+      db-users:
+        condition: service_healthy
     networks:
       - ilia-network
-    volumes:
-      - ./packages/ms-users:/app
-      - /app/node_modules
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   ms-transactions:
     build:
@@ -57,15 +72,23 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db-transactions:5432/transactions_db
       JWT_SECRET: ILIACHALLENGE
       JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
+      MS_USERS_URL: http://ms-users:3002
+      NODE_ENV: production
     ports:
       - "3001:3001"
     depends_on:
-      - db-transactions
+      db-transactions:
+        condition: service_healthy
+      ms-users:
+        condition: service_healthy
     networks:
       - ilia-network
-    volumes:
-      - ./packages/ms-transactions:/app
-      - /app/node_modules
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
   ilia-network:

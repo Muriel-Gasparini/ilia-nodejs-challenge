@@ -1,0 +1,13 @@
+{
+  "name": "ms-transactions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Transactions/Wallet microservice - Port 3001",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  }
+}

@@ -1,0 +1,76 @@
+services:
+  db-users:
+    image: postgres:15-alpine
+    container_name: ilia-db-users
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-users-data:/var/lib/postgresql/data
+    networks:
+      - ilia-network
+
+  db-transactions:
+    image: postgres:15-alpine
+    container_name: ilia-db-transactions
+    environment:
+      POSTGRES_DB: transactions_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-transactions-data:/var/lib/postgresql/data
+    networks:
+      - ilia-network
+
+  ms-users:
+    build:
+      context: ./packages/ms-users
+      dockerfile: Dockerfile
+    container_name: ilia-ms-users
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@db-users:5432/users_db
+      JWT_SECRET: ILIACHALLENGE
+      JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
+    ports:
+      - "3002:3002"
+    depends_on:
+      - db-users
+    networks:
+      - ilia-network
+    volumes:
+      - ./packages/ms-users:/app
+      - /app/node_modules
+
+  ms-transactions:
+    build:
+      context: ./packages/ms-transactions
+      dockerfile: Dockerfile
+    container_name: ilia-ms-transactions
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@db-transactions:5432/transactions_db
+      JWT_SECRET: ILIACHALLENGE
+      JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db-transactions
+    networks:
+      - ilia-network
+    volumes:
+      - ./packages/ms-transactions:/app
+      - /app/node_modules
+
+networks:
+  ilia-network:
+    driver: bridge
+
+volumes:
+  db-users-data:
+  db-transactions-data:

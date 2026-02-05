@@ -1,0 +1,19 @@
+{
+  "name": "ilia-nodejs-challenge",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:users": "npm run dev --workspace=ms-users",
+    "dev:transactions": "npm run dev --workspace=ms-transactions",
+    "dev": "npm run dev:users & npm run dev:transactions",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

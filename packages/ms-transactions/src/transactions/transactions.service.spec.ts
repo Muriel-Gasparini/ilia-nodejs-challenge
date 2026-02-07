@@ -10,11 +10,13 @@ describe('TransactionsService', () => {
 
   const mockPrismaService = {
     $transaction: jest.fn(),
+    $executeRaw: jest.fn(),
+    $queryRaw: jest.fn(),
     transaction: {
       create: jest.fn(),
       findMany: jest.fn(),
+      findUnique: jest.fn(),
     },
-    $queryRaw: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -42,20 +44,25 @@ describe('TransactionsService', () => {
         user_id: '123e4567-e89b-12d3-a456-426614174000',
         amount: 1000,
         type: TransactionType.CREDIT,
+        idempotency_key: 'idempotency-123',
       };
 
-      const expected = { ...dto, id: 'tx-123' };
+      const expected = { id: 'tx-123', user_id: dto.user_id, amount: dto.amount, type: dto.type };
 
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         return callback(mockPrismaService);
       });
 
+      mockPrismaService.$executeRaw.mockResolvedValue(undefined);
+      mockPrismaService.transaction.findUnique.mockResolvedValue(null);
       mockPrismaService.transaction.create.mockResolvedValue(expected);
 
       const result = await service.create(dto);
 
       expect(result).toEqual(expected);
       expect(mockPrismaService.$transaction).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.$executeRaw).toHaveBeenCalled();
+      expect(mockPrismaService.transaction.findUnique).toHaveBeenCalled();
       expect(mockPrismaService.transaction.create).toHaveBeenCalledWith({
         data: dto,
         select: {
@@ -72,9 +79,10 @@ describe('TransactionsService', () => {
         user_id: '123e4567-e89b-12d3-a456-426614174000',
         amount: 500,
         type: TransactionType.DEBIT,
+        idempotency_key: 'idempotency-456',
       };
 
-      const expected = { ...dto, id: 'tx-456' };
+      const expected = { id: 'tx-456', user_id: dto.user_id, amount: dto.amount, type: dto.type };
 
       mockPrismaService.$queryRaw.mockResolvedValue([
         { amount: BigInt(1000) },
@@ -84,6 +92,8 @@ describe('TransactionsService', () => {
         return callback(mockPrismaService);
       });
 
+      mockPrismaService.$executeRaw.mockResolvedValue(undefined);
+      mockPrismaService.transaction.findUnique.mockResolvedValue(null);
       mockPrismaService.transaction.create.mockResolvedValue(expected);
 
       const result = await service.create(dto);
@@ -106,6 +116,7 @@ describe('TransactionsService', () => {
         user_id: '123e4567-e89b-12d3-a456-426614174000',
         amount: 1500,
         type: TransactionType.DEBIT,
+        idempotency_key: 'idempotency-789',
       };
 
       mockPrismaService.$queryRaw.mockResolvedValue([
@@ -116,9 +127,36 @@ describe('TransactionsService', () => {
         return callback(mockPrismaService);
       });
 
+      mockPrismaService.$executeRaw.mockResolvedValue(undefined);
+      mockPrismaService.transaction.findUnique.mockResolvedValue(null);
+
       await expect(service.create(dto)).rejects.toThrow(BadRequestException);
       await expect(service.create(dto)).rejects.toThrow('Insufficient funds');
       expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+      expect(mockPrismaService.transaction.create).not.toHaveBeenCalled();
+    });
+
+    it('should return existing transaction when idempotency key already exists', async () => {
+      const dto = {
+        user_id: '123e4567-e89b-12d3-a456-426614174000',
+        amount: 500,
+        type: TransactionType.CREDIT,
+        idempotency_key: 'idempotency-existing',
+      };
+
+      const existing = { id: 'tx-existing', user_id: dto.user_id, amount: dto.amount, type: dto.type };
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockPrismaService);
+      });
+
+      mockPrismaService.$executeRaw.mockResolvedValue(undefined);
+      mockPrismaService.transaction.findUnique.mockResolvedValue(existing);
+
+      const result = await service.create(dto);
+
+      expect(result).toEqual(existing);
+      expect(mockPrismaService.transaction.findUnique).toHaveBeenCalled();
       expect(mockPrismaService.transaction.create).not.toHaveBeenCalled();
     });
   });

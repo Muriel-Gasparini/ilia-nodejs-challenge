@@ -12,4 +12,8 @@ export class CreateTransactionDto {
 
   @IsEnum(TransactionType)
   type: TransactionType;
+
+  @IsUUID()
+  @IsNotEmpty()
+  idempotency_key: string;
 }

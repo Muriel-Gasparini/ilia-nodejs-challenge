@@ -22,18 +22,16 @@ describe('JwtStrategy', () => {
     strategy = module.get<JwtStrategy>(JwtStrategy);
   });
 
-  it('should validate token and return user', async () => {
+  it('should validate token and return user', () => {
     const payload = { sub: '123', username: 'testuser' };
-    const result = await strategy.validate(payload);
+    const result = strategy.validate(payload);
 
     expect(result).toEqual({ userId: '123', username: 'testuser' });
   });
 
-  it('should throw UnauthorizedException for invalid payload', async () => {
+  it('should throw UnauthorizedException for invalid payload', () => {
     const payload = { username: 'testuser' };
 
-    await expect(strategy.validate(payload)).rejects.toThrow(
-      UnauthorizedException,
-    );
+    expect(() => strategy.validate(payload)).toThrow(UnauthorizedException);
   });
 });

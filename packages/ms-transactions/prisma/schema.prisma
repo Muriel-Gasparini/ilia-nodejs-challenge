@@ -12,13 +12,13 @@ enum TransactionType {
 }
 
 model Transaction {
-  id        String          @id @default(uuid())
-  userId    String          @map("user_id")
-  amount    Int
-  type      TransactionType
-  createdAt DateTime        @default(now()) @map("created_at")
-  updatedAt DateTime        @updatedAt @map("updated_at")
+  id         String          @id @default(uuid())
+  user_id    String
+  amount     Int
+  type       TransactionType
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
 
   @@map("transactions")
-  @@index([userId])
+  @@index([user_id])
 }

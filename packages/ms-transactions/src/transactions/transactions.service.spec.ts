@@ -6,7 +6,6 @@ import { TransactionType } from '@prisma/client';
 
 describe('TransactionsService', () => {
   let service: TransactionsService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     $transaction: jest.fn(),
@@ -31,7 +30,6 @@ describe('TransactionsService', () => {
     }).compile();
 
     service = module.get<TransactionsService>(TransactionsService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -47,11 +45,17 @@ describe('TransactionsService', () => {
         idempotency_key: 'idempotency-123',
       };
 
-      const expected = { id: 'tx-123', user_id: dto.user_id, amount: dto.amount, type: dto.type };
+      const expected = {
+        id: 'tx-123',
+        user_id: dto.user_id,
+        amount: dto.amount,
+        type: dto.type,
+      };
 
-      mockPrismaService.$transaction.mockImplementation(async (callback) => {
-        return callback(mockPrismaService);
-      });
+      mockPrismaService.$transaction.mockImplementation(
+        (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          callback(mockPrismaService),
+      );
 
       mockPrismaService.$executeRaw.mockResolvedValue(undefined);
       mockPrismaService.transaction.findUnique.mockResolvedValue(null);
@@ -82,15 +86,19 @@ describe('TransactionsService', () => {
         idempotency_key: 'idempotency-456',
       };
 
-      const expected = { id: 'tx-456', user_id: dto.user_id, amount: dto.amount, type: dto.type };
+      const expected = {
+        id: 'tx-456',
+        user_id: dto.user_id,
+        amount: dto.amount,
+        type: dto.type,
+      };
 
-      mockPrismaService.$queryRaw.mockResolvedValue([
-        { amount: BigInt(1000) },
-      ]);
+      mockPrismaService.$queryRaw.mockResolvedValue([{ amount: BigInt(1000) }]);
 
-      mockPrismaService.$transaction.mockImplementation(async (callback) => {
-        return callback(mockPrismaService);
-      });
+      mockPrismaService.$transaction.mockImplementation(
+        (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          callback(mockPrismaService),
+      );
 
       mockPrismaService.$executeRaw.mockResolvedValue(undefined);
       mockPrismaService.transaction.findUnique.mockResolvedValue(null);
@@ -119,13 +127,12 @@ describe('TransactionsService', () => {
         idempotency_key: 'idempotency-789',
       };
 
-      mockPrismaService.$queryRaw.mockResolvedValue([
-        { amount: BigInt(1000) },
-      ]);
+      mockPrismaService.$queryRaw.mockResolvedValue([{ amount: BigInt(1000) }]);
 
-      mockPrismaService.$transaction.mockImplementation(async (callback) => {
-        return callback(mockPrismaService);
-      });
+      mockPrismaService.$transaction.mockImplementation(
+        (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          callback(mockPrismaService),
+      );
 
       mockPrismaService.$executeRaw.mockResolvedValue(undefined);
       mockPrismaService.transaction.findUnique.mockResolvedValue(null);
@@ -144,11 +151,17 @@ describe('TransactionsService', () => {
         idempotency_key: 'idempotency-existing',
       };
 
-      const existing = { id: 'tx-existing', user_id: dto.user_id, amount: dto.amount, type: dto.type };
+      const existing = {
+        id: 'tx-existing',
+        user_id: dto.user_id,
+        amount: dto.amount,
+        type: dto.type,
+      };
 
-      mockPrismaService.$transaction.mockImplementation(async (callback) => {
-        return callback(mockPrismaService);
-      });
+      mockPrismaService.$transaction.mockImplementation(
+        (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          callback(mockPrismaService),
+      );
 
       mockPrismaService.$executeRaw.mockResolvedValue(undefined);
       mockPrismaService.transaction.findUnique.mockResolvedValue(existing);
@@ -168,7 +181,7 @@ describe('TransactionsService', () => {
 
       const result = await service.getBalance(userId);
 
-      expect(result.amount).toBe(500);
+      expect(result.amount).toBe(500n);
       expect(mockPrismaService.$queryRaw).toHaveBeenCalledTimes(1);
     });
 
@@ -178,7 +191,7 @@ describe('TransactionsService', () => {
 
       const result = await service.getBalance(userId);
 
-      expect(result.amount).toBe(0);
+      expect(result.amount).toBe(0n);
     });
   });
 
@@ -191,8 +204,11 @@ describe('TransactionsService', () => {
 
       expect(mockPrismaService.transaction.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ user_id: userId }),
-        }),
+          where: expect.objectContaining({ user_id: userId }) as Record<
+            string,
+            unknown
+          >,
+        }) as Record<string, unknown>,
       );
     });
 
@@ -203,8 +219,10 @@ describe('TransactionsService', () => {
 
       expect(mockPrismaService.transaction.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ type: TransactionType.CREDIT }),
-        }),
+          where: expect.objectContaining({
+            type: TransactionType.CREDIT,
+          }) as Record<string, unknown>,
+        }) as Record<string, unknown>,
       );
     });
   });

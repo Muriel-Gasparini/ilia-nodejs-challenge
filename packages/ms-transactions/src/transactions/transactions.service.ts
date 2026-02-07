@@ -1,8 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import {
-  PrismaService,
-  PrismaTransaction,
-} from '../prisma/prisma.service';
+import { PrismaService, PrismaTransaction } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionType } from '@prisma/client';
 

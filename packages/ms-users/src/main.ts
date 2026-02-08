@@ -12,4 +12,4 @@ async function bootstrap() {
 
   console.log(`[MS-Users] Server running on port ${port}`);
 }
-bootstrap();
+void bootstrap();

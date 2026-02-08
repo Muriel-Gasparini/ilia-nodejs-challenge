@@ -5,6 +5,7 @@ describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
 
   beforeEach(() => {
+    process.env.JWT_SECRET = 'test-secret';
     strategy = new JwtStrategy();
   });
 

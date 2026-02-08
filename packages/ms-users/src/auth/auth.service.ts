@@ -30,9 +30,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+
     const payload = { sub: user.id, username: user.email };
     const access_token = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET || 'ILIACHALLENGE',
+      secret: process.env.JWT_SECRET,
       expiresIn: '24h',
     });
 

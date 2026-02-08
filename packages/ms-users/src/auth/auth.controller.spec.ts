@@ -24,6 +24,8 @@ describe('AuthController', () => {
   };
 
   beforeEach(async () => {
+    process.env.JWT_SECRET = 'test-secret';
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [

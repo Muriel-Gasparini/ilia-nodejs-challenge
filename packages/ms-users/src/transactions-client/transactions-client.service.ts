@@ -22,10 +22,12 @@ export class TransactionsClientService {
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
   ) {
+    if (!process.env.JWT_INTERNAL_SECRET) {
+      throw new Error('JWT_INTERNAL_SECRET environment variable is required');
+    }
     this.msTransactionsUrl =
       process.env.MS_TRANSACTIONS_URL || 'http://localhost:3001';
-    this.jwtInternalSecret =
-      process.env.JWT_INTERNAL_SECRET || 'ILIACHALLENGE_INTERNAL';
+    this.jwtInternalSecret = process.env.JWT_INTERNAL_SECRET;
   }
 
   private generateInternalToken(): string {

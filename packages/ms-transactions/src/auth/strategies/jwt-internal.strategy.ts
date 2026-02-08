@@ -9,11 +9,14 @@ export class JwtInternalStrategy extends PassportStrategy(
   'jwt-internal',
 ) {
   constructor(private config: ConfigService) {
+    const jwtInternalSecret = config.get<string>('JWT_INTERNAL_SECRET');
+    if (!jwtInternalSecret) {
+      throw new Error('JWT_INTERNAL_SECRET environment variable is required');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey:
-        config.get('JWT_INTERNAL_SECRET') || 'ILIACHALLENGE_INTERNAL',
+      secretOrKey: jwtInternalSecret,
     });
   }
 

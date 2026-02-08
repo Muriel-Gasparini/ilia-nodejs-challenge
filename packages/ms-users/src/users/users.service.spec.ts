@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon2 from 'argon2';
@@ -178,6 +178,35 @@ describe('UsersService', () => {
       });
       expect(result).toEqual(expectedUser);
     });
+
+    it('should throw ForbiddenException when requesting another user profile', async () => {
+      const userId = '123';
+      const requestingUserId = '456';
+
+      await expect(service.findOne(userId, requestingUserId)).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockPrismaService.user.findUniqueOrThrow).not.toHaveBeenCalled();
+    });
+
+    it('should allow viewing own profile', async () => {
+      const userId = '123';
+      const expectedUser = {
+        id: userId,
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      mockPrismaService.user.findUniqueOrThrow.mockResolvedValue(expectedUser);
+
+      const result = await service.findOne(userId, userId);
+
+      expect(mockPrismaService.user.findUniqueOrThrow).toHaveBeenCalled();
+      expect(result).toEqual(expectedUser);
+    });
   });
 
   describe('update', () => {
@@ -291,6 +320,37 @@ describe('UsersService', () => {
 
       expect(result).toEqual(expectedUser);
     });
+
+    it('should throw ForbiddenException when updating another user profile', async () => {
+      const userId = '123';
+      const requestingUserId = '456';
+      const updateUserDto = { first_name: 'Jane' };
+
+      await expect(
+        service.update(userId, updateUserDto, requestingUserId),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should allow updating own profile', async () => {
+      const userId = '123';
+      const updateUserDto = { first_name: 'Jane' };
+      const expectedUser = {
+        id: userId,
+        first_name: 'Jane',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      mockPrismaService.user.update.mockResolvedValue(expectedUser);
+
+      const result = await service.update(userId, updateUserDto, userId);
+
+      expect(mockPrismaService.user.update).toHaveBeenCalled();
+      expect(result.first_name).toBe('Jane');
+    });
   });
 
   describe('remove', () => {
@@ -313,6 +373,36 @@ describe('UsersService', () => {
       expect(mockPrismaService.user.delete).toHaveBeenCalledWith({
         where: { id: userId },
       });
+      expect(result).toEqual(deletedUser);
+    });
+
+    it('should throw ForbiddenException when deleting another user account', async () => {
+      const userId = '123';
+      const requestingUserId = '456';
+
+      await expect(service.remove(userId, requestingUserId)).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockPrismaService.user.delete).not.toHaveBeenCalled();
+    });
+
+    it('should allow deleting own account', async () => {
+      const userId = '123';
+      const deletedUser = {
+        id: userId,
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        password: 'hashed',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      mockPrismaService.user.delete.mockResolvedValue(deletedUser);
+
+      const result = await service.remove(userId, userId);
+
+      expect(mockPrismaService.user.delete).toHaveBeenCalled();
       expect(result).toEqual(deletedUser);
     });
   });

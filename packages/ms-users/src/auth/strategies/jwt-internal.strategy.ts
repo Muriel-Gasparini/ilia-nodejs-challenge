@@ -8,10 +8,13 @@ export class JwtInternalStrategy extends PassportStrategy(
   'jwt-internal',
 ) {
   constructor() {
+    if (!process.env.JWT_INTERNAL_SECRET) {
+      throw new Error('JWT_INTERNAL_SECRET environment variable is required');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_INTERNAL_SECRET || 'ILIACHALLENGE_INTERNAL',
+      secretOrKey: process.env.JWT_INTERNAL_SECRET,
     });
   }
 

@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -53,7 +57,11 @@ export class UsersService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requestingUserId?: string) {
+    if (requestingUserId && id !== requestingUserId) {
+      throw new ForbiddenException('You can only view your own profile');
+    }
+
     return await this.prisma.user.findUniqueOrThrow({
       where: { id },
       select: {
@@ -68,7 +76,15 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    requestingUserId?: string,
+  ) {
+    if (requestingUserId && id !== requestingUserId) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
+
     if (updateUserDto.email) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: updateUserDto.email },
@@ -100,7 +116,11 @@ export class UsersService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string, requestingUserId?: string) {
+    if (requestingUserId && id !== requestingUserId) {
+      throw new ForbiddenException('You can only delete your own account');
+    }
+
     return await this.prisma.user.delete({
       where: { id },
     });

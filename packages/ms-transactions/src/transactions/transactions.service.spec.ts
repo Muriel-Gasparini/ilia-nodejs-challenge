@@ -2,7 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsService } from './transactions.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException } from '@nestjs/common';
-import { TransactionType } from '@prisma/client';
+
+enum TransactionType {
+  CREDIT = 'CREDIT',
+  DEBIT = 'DEBIT',
+}
+
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn(),
+  TransactionType: {
+    CREDIT: 'CREDIT',
+    DEBIT: 'DEBIT',
+  },
+}));
 
 describe('TransactionsService', () => {
   let service: TransactionsService;

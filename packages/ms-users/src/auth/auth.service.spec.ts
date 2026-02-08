@@ -23,6 +23,8 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    process.env.JWT_SECRET = 'test-secret';
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -89,7 +91,7 @@ describe('AuthService', () => {
       expect(jwtService.sign).toHaveBeenCalledWith(
         { sub: mockUser.id, username: mockUser.email },
         {
-          secret: 'ILIACHALLENGE',
+          secret: 'test-secret',
           expiresIn: '24h',
         },
       );

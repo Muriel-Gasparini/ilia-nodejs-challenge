@@ -3,10 +3,10 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { TransactionType } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtOrInternalAuthGuard } from '../auth/guards/jwt-or-internal-auth.guard';
 
 @Controller('transactions')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtOrInternalAuthGuard)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
@@ -22,7 +22,7 @@ export class TransactionsController {
 }
 
 @Controller('balance')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtOrInternalAuthGuard)
 export class BalanceController {
   constructor(private readonly transactionsService: TransactionsService) {}
 

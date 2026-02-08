@@ -10,10 +10,23 @@
     "dev:transactions": "npm run dev --workspace=ms-transactions",
     "dev": "npm run dev:users & npm run dev:transactions",
     "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "prepare": "husky || true"
+  },
+  "lint-staged": {
+    "packages/ms-transactions/**/*.ts": [
+      "npm run lint --workspace=ms-transactions"
+    ],
+    "packages/ms-users/**/*.ts": [
+      "npm run lint --workspace=ms-users"
+    ]
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
   }
 }

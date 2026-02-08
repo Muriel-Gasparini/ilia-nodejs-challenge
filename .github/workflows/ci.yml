@@ -27,9 +27,17 @@ jobs:
       working-directory: packages/ms-users
       run: npm install
 
+    - name: Generate Prisma Client - ms-users
+      working-directory: packages/ms-users
+      run: npx prisma generate
+
     - name: Install dependencies - ms-transactions
       working-directory: packages/ms-transactions
       run: npm install
+
+    - name: Generate Prisma Client - ms-transactions
+      working-directory: packages/ms-transactions
+      run: npx prisma generate
 
     - name: Lint - ms-users
       working-directory: packages/ms-users

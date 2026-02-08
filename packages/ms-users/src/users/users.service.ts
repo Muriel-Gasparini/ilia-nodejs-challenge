@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,12 +6,20 @@ import * as argon2 from 'argon2';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
     const hashedPassword = await argon2.hash(createUserDto.password);
 
-    const user = await this.prisma.user.create({
+    return await this.prisma.user.create({
       data: {
         ...createUserDto,
         password: hashedPassword,
@@ -26,12 +34,10 @@ export class UsersService {
         password: false,
       },
     });
-
-    return user;
   }
 
   async findAll() {
-    return this.prisma.user.findMany({
+    return await this.prisma.user.findMany({
       select: {
         id: true,
         first_name: true,
@@ -48,7 +54,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    return this.prisma.user.findUniqueOrThrow({
+    return await this.prisma.user.findUniqueOrThrow({
       where: { id },
       select: {
         id: true,
@@ -63,13 +69,23 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.email) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: updateUserDto.email },
+      });
+
+      if (existingUser && existingUser.id !== id) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
     const data = { ...updateUserDto };
 
     if (updateUserDto.password) {
       data.password = await argon2.hash(updateUserDto.password);
     }
 
-    return this.prisma.user.update({
+    return await this.prisma.user.update({
       where: { id },
       data,
       select: {
@@ -85,7 +101,7 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    return this.prisma.user.delete({
+    return await this.prisma.user.delete({
       where: { id },
     });
   }

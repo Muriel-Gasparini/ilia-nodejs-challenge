@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon2 from 'argon2';
@@ -12,6 +13,7 @@ describe('UsersService', () => {
     user: {
       create: jest.fn(),
       findMany: jest.fn(),
+      findUnique: jest.fn(),
       findUniqueOrThrow: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -61,10 +63,14 @@ describe('UsersService', () => {
         updated_at: new Date(),
       };
 
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
       mockPrismaService.user.create.mockResolvedValue(expectedUser);
 
       const result = await service.create(createUserDto);
 
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'john@example.com' },
+      });
       expect(argon2.hash).toHaveBeenCalledWith('password123');
       expect(mockPrismaService.user.create).toHaveBeenCalledWith({
         data: {
@@ -83,6 +89,27 @@ describe('UsersService', () => {
       });
       expect(result).toEqual(expectedUser);
       expect(result).not.toHaveProperty('password');
+    });
+
+    it('should throw ConflictException if email already exists', async () => {
+      const createUserDto = {
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        password: 'password123',
+      };
+
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'existing-id',
+        email: 'john@example.com',
+      });
+
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        'Email already exists',
+      );
     });
   });
 
@@ -217,6 +244,51 @@ describe('UsersService', () => {
       const result = await service.update(userId, updateUserDto);
 
       expect(argon2.hash).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedUser);
+    });
+
+    it('should throw ConflictException if email already exists for another user', async () => {
+      const userId = '123';
+      const updateUserDto = {
+        email: 'another@example.com',
+      };
+
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'different-id',
+        email: 'another@example.com',
+      });
+
+      await expect(service.update(userId, updateUserDto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.update(userId, updateUserDto)).rejects.toThrow(
+        'Email already exists',
+      );
+    });
+
+    it('should allow updating email to same email', async () => {
+      const userId = '123';
+      const updateUserDto = {
+        email: 'john@example.com',
+      };
+
+      const expectedUser = {
+        id: userId,
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: userId,
+        email: 'john@example.com',
+      });
+      mockPrismaService.user.update.mockResolvedValue(expectedUser);
+
+      const result = await service.update(userId, updateUserDto);
+
       expect(result).toEqual(expectedUser);
     });
   });

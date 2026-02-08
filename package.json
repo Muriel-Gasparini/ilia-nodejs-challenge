@@ -6,11 +6,19 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:users": "npm run dev --workspace=ms-users",
-    "dev:transactions": "npm run dev --workspace=ms-transactions",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:prod": "docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml --env-file .env.prod down 2>/dev/null || docker compose -f docker-compose.prod.yml down",
+    "db:migrate": "npm run prisma:migrate --workspace=ms-users && npm run prisma:migrate --workspace=ms-transactions",
+    "dev:users": "npm run start:dev --workspace=ms-users",
+    "dev:transactions": "npm run start:dev --workspace=ms-transactions",
     "dev": "npm run dev:users & npm run dev:transactions",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
+    "test:e2e": "npm run test:e2e --workspaces",
+    "lint": "npm run lint --workspaces",
     "prepare": "husky || true"
   },
   "lint-staged": {

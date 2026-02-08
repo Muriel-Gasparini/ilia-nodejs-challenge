@@ -14,8 +14,8 @@ services:
       - ilia-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
 
   db-transactions:
@@ -33,62 +33,9 @@ services:
       - ilia-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
-
-  ms-users:
-    build:
-      context: ./packages/ms-users
-      dockerfile: Dockerfile
-    container_name: ilia-ms-users
-    environment:
-      PORT: 3002
-      DATABASE_URL: postgresql://postgres:postgres@db-users:5432/users_db
-      JWT_SECRET: ILIACHALLENGE
-      JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
-      NODE_ENV: production
-    ports:
-      - "3002:3002"
-    depends_on:
-      db-users:
-        condition: service_healthy
-    networks:
-      - ilia-network
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3002/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  ms-transactions:
-    build:
-      context: ./packages/ms-transactions
-      dockerfile: Dockerfile
-    container_name: ilia-ms-transactions
-    environment:
-      PORT: 3001
-      DATABASE_URL: postgresql://postgres:postgres@db-transactions:5432/transactions_db
-      JWT_SECRET: ILIACHALLENGE
-      JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
-      MS_USERS_URL: http://ms-users:3002
-      NODE_ENV: production
-    ports:
-      - "3001:3001"
-    depends_on:
-      db-transactions:
-        condition: service_healthy
-      ms-users:
-        condition: service_healthy
-    networks:
-      - ilia-network
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
 networks:
   ilia-network:

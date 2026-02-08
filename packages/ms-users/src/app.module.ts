@@ -4,9 +4,17 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { TransactionsClientModule } from './transactions-client/transactions-client.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    TransactionsClientModule,
+    WalletModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

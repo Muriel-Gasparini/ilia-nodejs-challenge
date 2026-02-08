@@ -23,12 +23,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies - ms-users
-      working-directory: packages/ms-users
-      run: npm install
-
-    - name: Install dependencies - ms-transactions
-      working-directory: packages/ms-transactions
+    - name: Install dependencies (root workspace)
       run: npm install
 
     - name: Lint - ms-users

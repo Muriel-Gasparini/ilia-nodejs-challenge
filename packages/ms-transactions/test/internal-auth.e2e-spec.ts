@@ -1,6 +1,7 @@
+import 'dotenv/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { JwtService } from '@nestjs/jwt';
 
@@ -21,13 +22,11 @@ describe('Internal Authentication (e2e)', () => {
 
     jwtService = moduleFixture.get<JwtService>(JwtService);
 
-    // Generate external JWT token (user token)
     externalToken = jwtService.sign(
       { sub: '550e8400-e29b-41d4-a716-446655440000', username: 'testuser' },
       { secret: process.env.JWT_SECRET || 'ILIACHALLENGE', expiresIn: '1h' },
     );
 
-    // Generate internal JWT token (service token)
     internalToken = jwtService.sign(
       { sub: 'ms-users', service: 'ms-users' },
       {

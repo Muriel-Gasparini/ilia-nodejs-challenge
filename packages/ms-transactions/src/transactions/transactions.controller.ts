@@ -27,7 +27,11 @@ export class BalanceController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Get()
-  getBalance(@Query() query: GetBalanceDto) {
-    return this.transactionsService.getBalance(query.user_id);
+  async getBalance(@Query() query: GetBalanceDto) {
+    const result = await this.transactionsService.getBalance(query.user_id);
+    return {
+      user_id: query.user_id,
+      balance: Number(result.amount),
+    };
   }
 }

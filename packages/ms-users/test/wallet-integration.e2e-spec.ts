@@ -1,41 +1,87 @@
+import 'dotenv/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { TransactionsClientService } from '../src/transactions-client/transactions-client.service';
+import { UsersService } from '../src/users/users.service';
 
 describe('Wallet Integration (e2e)', () => {
   let app: INestApplication;
   let jwtService: JwtService;
-  let prismaService: PrismaService;
   let externalToken: string;
-  let userId: string;
+  const userId = '550e8400-e29b-41d4-a716-446655440000';
+  let transactionId = 0;
+
+  const mockUsersService = {
+    findOne: jest.fn().mockResolvedValue({
+      id: userId,
+      first_name: 'Test',
+      last_name: 'User',
+      email: 'test@example.com',
+      created_at: new Date(),
+      updated_at: new Date(),
+    }),
+  };
+
+  const mockTransactionsClient = {
+    getBalance: jest.fn().mockImplementation((userId: string) =>
+      Promise.resolve({
+        user_id: userId,
+        balance: 1500,
+      }),
+    ),
+    getTransactions: jest
+      .fn()
+      .mockImplementation((userId: string, type?: string) => {
+        const transactions = [
+          {
+            id: 'txn-1',
+            user_id: userId,
+            amount: 1000,
+            type: 'CREDIT',
+            created_at: new Date(),
+          },
+          {
+            id: 'txn-2',
+            user_id: userId,
+            amount: 500,
+            type: 'DEBIT',
+            created_at: new Date(),
+          },
+        ];
+        return Promise.resolve(
+          type ? transactions.filter((t) => t.type === type) : transactions,
+        );
+      }),
+    createTransaction: jest.fn().mockImplementation((data) =>
+      Promise.resolve({
+        id: `txn-${++transactionId}`,
+        user_id: data.user_id,
+        amount: data.amount,
+        type: data.type,
+        created_at: new Date(),
+      }),
+    ),
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(TransactionsClientService)
+      .useValue(mockTransactionsClient)
+      .overrideProvider(UsersService)
+      .useValue(mockUsersService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
 
     jwtService = moduleFixture.get<JwtService>(JwtService);
-    prismaService = moduleFixture.get<PrismaService>(PrismaService);
 
-    // Create a test user
-    const user = await prismaService.user.create({
-      data: {
-        first_name: 'Test',
-        last_name: 'User',
-        email: `test-${Date.now()}@example.com`,
-        password: 'hashed_password',
-      },
-    });
-    userId = user.id;
-
-    // Generate external JWT token
     externalToken = jwtService.sign(
       { sub: userId, username: 'testuser' },
       { secret: process.env.JWT_SECRET || 'ILIACHALLENGE', expiresIn: '1h' },
@@ -43,115 +89,125 @@ describe('Wallet Integration (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Clean up test user
-    if (userId) {
-      await prismaService.user.delete({ where: { id: userId } }).catch(() => {
-        // Ignore if already deleted
-      });
-    }
     await app.close();
   });
 
   describe('Wallet Endpoints', () => {
-    it('should create a CREDIT transaction', () => {
-      return request(app.getHttpServer())
+    it('should create a CREDIT transaction', async () => {
+      const response = await request(app.getHttpServer())
         .post(`/users/${userId}/wallet/transactions`)
         .set('Authorization', `Bearer ${externalToken}`)
         .send({
           amount: 1000,
           type: 'CREDIT',
         })
-        .expect(201)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('id');
-          expect(res.body.user_id).toBe(userId);
-          expect(res.body.amount).toBe(1000);
-          expect(res.body.type).toBe('CREDIT');
-        });
+        .expect(201);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.user_id).toBe(userId);
+      expect(response.body.amount).toBe(1000);
+      expect(response.body.type).toBe('CREDIT');
+      expect(mockTransactionsClient.createTransaction).toHaveBeenCalled();
+      expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
     });
 
-    it('should get user balance', () => {
-      return request(app.getHttpServer())
+    it('should get user balance', async () => {
+      const response = await request(app.getHttpServer())
         .get(`/users/${userId}/wallet/balance`)
         .set('Authorization', `Bearer ${externalToken}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('balance');
-          expect(res.body.user_id).toBe(userId);
-          expect(res.body.balance).toBeGreaterThanOrEqual(1000);
-        });
+        .expect(200);
+
+      expect(response.body).toHaveProperty('balance');
+      expect(response.body.user_id).toBe(userId);
+      expect(response.body.balance).toBe(1500);
+      expect(mockTransactionsClient.getBalance).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
     });
 
-    it('should create a DEBIT transaction', () => {
-      return request(app.getHttpServer())
+    it('should create a DEBIT transaction', async () => {
+      const response = await request(app.getHttpServer())
         .post(`/users/${userId}/wallet/transactions`)
         .set('Authorization', `Bearer ${externalToken}`)
         .send({
           amount: 500,
           type: 'DEBIT',
         })
-        .expect(201)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('id');
-          expect(res.body.user_id).toBe(userId);
-          expect(res.body.amount).toBe(500);
-          expect(res.body.type).toBe('DEBIT');
-        });
+        .expect(201);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.user_id).toBe(userId);
+      expect(response.body.amount).toBe(500);
+      expect(response.body.type).toBe('DEBIT');
     });
 
-    it('should get updated balance', () => {
-      return request(app.getHttpServer())
+    it('should get updated balance', async () => {
+      const response = await request(app.getHttpServer())
         .get(`/users/${userId}/wallet/balance`)
         .set('Authorization', `Bearer ${externalToken}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('balance');
-          expect(res.body.user_id).toBe(userId);
-          expect(res.body.balance).toBeGreaterThanOrEqual(500);
-        });
+        .expect(200);
+
+      expect(response.body).toHaveProperty('balance');
+      expect(response.body.user_id).toBe(userId);
     });
 
-    it('should list all transactions', () => {
-      return request(app.getHttpServer())
+    it('should list all transactions', async () => {
+      const response = await request(app.getHttpServer())
         .get(`/users/${userId}/wallet/transactions`)
         .set('Authorization', `Bearer ${externalToken}`)
-        .expect(200)
-        .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThanOrEqual(2);
-        });
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThanOrEqual(2);
+      expect(mockTransactionsClient.getTransactions).toHaveBeenCalledWith(
+        userId,
+        undefined,
+      );
     });
 
-    it('should filter transactions by type', () => {
-      return request(app.getHttpServer())
+    it('should filter transactions by type', async () => {
+      const response = await request(app.getHttpServer())
         .get(`/users/${userId}/wallet/transactions?type=CREDIT`)
         .set('Authorization', `Bearer ${externalToken}`)
-        .expect(200)
-        .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          res.body.forEach((transaction: { type: string }) => {
-            expect(transaction.type).toBe('CREDIT');
-          });
-        });
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      response.body.forEach((transaction: { type: string }) => {
+        expect(transaction.type).toBe('CREDIT');
+      });
+      expect(mockTransactionsClient.getTransactions).toHaveBeenCalledWith(
+        userId,
+        'CREDIT',
+      );
     });
 
-    it('should return 404 for non-existent user', () => {
-      return request(app.getHttpServer())
-        .get('/users/550e8400-e29b-41d4-a716-446655440000/wallet/balance')
+    it('should return 404 for non-existent user', async () => {
+      mockUsersService.findOne.mockRejectedValueOnce(new Error('Not found'));
+
+      await request(app.getHttpServer())
+        .get('/users/999/wallet/balance')
         .set('Authorization', `Bearer ${externalToken}`)
         .expect(404);
+
+      mockUsersService.findOne.mockResolvedValue({
+        id: userId,
+        first_name: 'Test',
+        last_name: 'User',
+        email: 'test@example.com',
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
     });
 
-    it('should reject request without authentication', () => {
-      return request(app.getHttpServer())
+    it('should reject request without authentication', async () => {
+      await request(app.getHttpServer())
         .get(`/users/${userId}/wallet/balance`)
         .expect(401);
     });
   });
 
   describe('Error Handling', () => {
-    it('should handle invalid transaction amount', () => {
-      return request(app.getHttpServer())
+    it('should handle invalid transaction amount', async () => {
+      await request(app.getHttpServer())
         .post(`/users/${userId}/wallet/transactions`)
         .set('Authorization', `Bearer ${externalToken}`)
         .send({
@@ -161,8 +217,8 @@ describe('Wallet Integration (e2e)', () => {
         .expect(400);
     });
 
-    it('should handle invalid transaction type', () => {
-      return request(app.getHttpServer())
+    it('should handle invalid transaction type', async () => {
+      await request(app.getHttpServer())
         .post(`/users/${userId}/wallet/transactions`)
         .set('Authorization', `Bearer ${externalToken}`)
         .send({
@@ -172,8 +228,8 @@ describe('Wallet Integration (e2e)', () => {
         .expect(400);
     });
 
-    it('should handle missing amount', () => {
-      return request(app.getHttpServer())
+    it('should handle missing amount', async () => {
+      await request(app.getHttpServer())
         .post(`/users/${userId}/wallet/transactions`)
         .set('Authorization', `Bearer ${externalToken}`)
         .send({

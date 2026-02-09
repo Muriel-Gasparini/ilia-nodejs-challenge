@@ -2,7 +2,6 @@ import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService, PrismaTransaction } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionType } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class TransactionsService {
@@ -54,12 +53,12 @@ export class TransactionsService {
 
         if (type === TransactionType.DEBIT) {
           const balance = await this.getBalance(user_id, tx);
-          const requestedAmount = new Decimal(amount);
-          if (balance.amount.lessThan(requestedAmount)) {
+          const balanceNumber = Number(balance.amount);
+          if (balanceNumber < amount) {
             this.logger.warn({
               message: 'Insufficient funds',
-              requested_amount: requestedAmount.toString(),
-              available_balance: balance.amount.toString(),
+              requested_amount: amount,
+              available_balance: balanceNumber,
               idempotency_key,
             });
             throw new BadRequestException('Insufficient funds');
@@ -141,7 +140,7 @@ export class TransactionsService {
     });
 
     const prisma = tx || this.prisma;
-    const result = await prisma.$queryRaw<Array<{ amount: Decimal }>>`
+    const result = await prisma.$queryRaw<Array<{ amount: any }>>`
       SELECT
         COALESCE(SUM(CASE WHEN type = 'CREDIT' THEN amount ELSE 0 END), 0) -
         COALESCE(SUM(CASE WHEN type = 'DEBIT' THEN amount ELSE 0 END), 0) as amount
@@ -149,11 +148,11 @@ export class TransactionsService {
       WHERE user_id = ${userId}
     `;
 
-    const amount = result[0]?.amount ?? new Decimal(0);
+    const amount = result[0]?.amount ?? 0;
 
     this.logger.log({
       message: 'Balance fetched',
-      balance: amount.toString(),
+      balance: String(amount),
     });
 
     return { amount };

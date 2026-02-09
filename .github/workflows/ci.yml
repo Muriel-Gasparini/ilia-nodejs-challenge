@@ -26,6 +26,11 @@ jobs:
     - name: Install dependencies (root workspace)
       run: npm install
 
+    - name: Generate Prisma Clients
+      run: |
+        npx prisma generate --schema=packages/ms-users/prisma/schema.prisma
+        npx prisma generate --schema=packages/ms-transactions/prisma/schema.prisma
+
     - name: Lint - ms-users
       working-directory: packages/ms-users
       run: npm run lint

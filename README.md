@@ -113,7 +113,7 @@ All wallet operations validate ownership (users can only access their own wallet
 
 ## Design Decisions
 
-### What We Built (Production Essentials)
+### What I Built (Production Essentials)
 
 **Security First**
 - Implemented Helmet for standard HTTP security headers (prevents common web vulnerabilities)
@@ -138,9 +138,9 @@ All wallet operations validate ownership (users can only access their own wallet
 - Environment variable separation keeps secrets safe
 - Test suite with unit and e2e tests
 
-### What We Intentionally Kept Simple (Avoiding Over-Engineering)
+### What I Intentionally Kept Simple (Avoiding Over-Engineering)
 
-This project demonstrates awareness of enterprise patterns while maintaining pragmatic simplicity. Here's what we **didn't** implement and why:
+This project demonstrates awareness of enterprise patterns while maintaining pragmatic simplicity. Here's what I **didn't** implement and why:
 
 #### 1. Message Queues (RabbitMQ/Kafka) - NOT USED
 

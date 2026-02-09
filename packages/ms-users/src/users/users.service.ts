@@ -57,6 +57,14 @@ export class UsersService {
     });
   }
 
+  async exists(id: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    return !!user;
+  }
+
   async findOne(id: string, requestingUserId?: string) {
     if (requestingUserId && id !== requestingUserId) {
       throw new ForbiddenException('You can only view your own profile');

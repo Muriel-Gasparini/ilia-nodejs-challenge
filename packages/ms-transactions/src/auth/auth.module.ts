@@ -11,10 +11,16 @@ import { JwtInternalStrategy } from './strategies/jwt-internal.strategy';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET') || 'ILIACHALLENGE',
-        signOptions: { expiresIn: '24h' },
-      }),
+      useFactory: (config: ConfigService) => {
+        const secret = config.get('JWT_SECRET');
+        if (!secret) {
+          throw new Error('JWT_SECRET environment variable is required');
+        }
+        return {
+          secret,
+          signOptions: { expiresIn: '24h' },
+        };
+      },
     }),
   ],
   providers: [JwtStrategy, JwtInternalStrategy],

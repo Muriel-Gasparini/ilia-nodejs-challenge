@@ -1,26 +1,29 @@
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { cn, formatCurrency, formatDate } from '@/lib/utils';
+import { transactionTypeStyles } from '@/lib/transaction-styles';
 import type { Transaction } from '@/types/api';
 
 interface TransactionItemProps {
   transaction: Transaction;
+  size?: 'sm' | 'md';
 }
 
-export function TransactionItem({ transaction: tx }: TransactionItemProps) {
+export function TransactionItem({ transaction: tx, size = 'md' }: TransactionItemProps) {
   const { t, i18n } = useTranslation();
+  const style = transactionTypeStyles[tx.type];
 
   return (
     <div className="flex items-center justify-between py-3">
       <div className="flex min-w-0 items-center gap-3">
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full text-lg ${
-            tx.type === 'CREDIT'
-              ? 'bg-primary-100 text-primary-700 dark:bg-primary-400/15 dark:text-primary-400'
-              : 'bg-error-50 text-error-500 dark:bg-error-400/15 dark:text-error-400'
-          }`}
+          className={cn(
+            'flex items-center justify-center rounded-full text-lg',
+            size === 'sm' ? 'h-9 w-9' : 'h-10 w-10',
+            style.iconBg,
+          )}
         >
-          {tx.type === 'CREDIT' ? '↑' : '↓'}
+          {style.arrow}
         </div>
         <div>
           <Badge type={tx.type} label={t(`transactions:${tx.type.toLowerCase()}`)} />
@@ -30,13 +33,13 @@ export function TransactionItem({ transaction: tx }: TransactionItemProps) {
         </div>
       </div>
       <span
-        className={`shrink-0 text-xs sm:text-base font-semibold ${
-          tx.type === 'CREDIT'
-            ? 'text-primary-600 dark:text-primary-400'
-            : 'text-error-500 dark:text-error-400'
-        }`}
+        className={cn(
+          'shrink-0 text-xs font-semibold',
+          size === 'sm' ? 'sm:text-sm' : 'sm:text-base',
+          style.amountColor,
+        )}
       >
-        {tx.type === 'CREDIT' ? '+' : '-'}
+        {style.prefix}
         {formatCurrency(tx.amount)}
       </span>
     </div>

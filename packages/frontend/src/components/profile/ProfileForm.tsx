@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Card, InlineFeedback } from '@/components/ui';
+import { Button, Input, Card, FormFeedback } from '@/components/ui';
 import { useCurrentUser, useUpdateUser } from '@/hooks/use-user';
+import { useFeedback } from '@/hooks/use-feedback';
 import { getErrorMessage } from '@/lib/errors';
 
 const profileSchema = z.object({
@@ -15,17 +16,12 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-interface Feedback {
-  variant: 'success' | 'error';
-  message: string;
-}
-
 export function ProfileForm() {
   const { t } = useTranslation();
   const { data: user } = useCurrentUser();
   const updateUser = useUpdateUser();
   const [editing, setEditing] = useState(false);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const { feedback, setFeedback, clearFeedback } = useFeedback();
 
   const {
     register,
@@ -46,8 +42,6 @@ export function ProfileForm() {
       });
     }
   }, [user, reset]);
-
-  const clearFeedback = useCallback(() => setFeedback(null), []);
 
   const onSubmit = (data: ProfileFormData) => {
     updateUser.mutate(data, {
@@ -91,15 +85,7 @@ export function ProfileForm() {
         )}
       </div>
 
-      {feedback && (
-        <InlineFeedback
-          variant={feedback.variant}
-          message={feedback.message}
-          className="mb-4"
-          autoDismissMs={feedback.variant === 'success' ? 5000 : 0}
-          onDismiss={clearFeedback}
-        />
-      )}
+      <FormFeedback feedback={feedback} onDismiss={clearFeedback} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

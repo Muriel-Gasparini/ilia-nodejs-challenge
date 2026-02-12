@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Card, Badge, Skeleton, EmptyState } from '@/components/ui';
+import { Card, Skeleton, EmptyState } from '@/components/ui';
+import { TransactionItem } from '@/components/transactions';
 import { useTransactions } from '@/hooks/use-wallet';
-import { formatCurrency, formatDate } from '@/lib/utils';
 
 export function RecentTransactions() {
-  const { t, i18n } = useTranslation('dashboard');
+  const { t } = useTranslation('dashboard');
   const { data: response, isLoading } = useTransactions(undefined, 1, 5);
 
   const recent = response?.data;
@@ -33,35 +33,7 @@ export function RecentTransactions() {
       ) : (
         <div className="flex flex-col divide-y divide-[var(--border-secondary)]">
           {recent.map((tx) => (
-            <div key={tx.id} className="flex items-center justify-between py-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-full ${
-                    tx.type === 'CREDIT'
-                      ? 'bg-primary-100 text-primary-700 dark:bg-primary-400/15 dark:text-primary-400'
-                      : 'bg-error-50 text-error-500 dark:bg-error-400/15 dark:text-error-400'
-                  }`}
-                >
-                  {tx.type === 'CREDIT' ? '↑' : '↓'}
-                </div>
-                <div>
-                  <Badge type={tx.type} label={t(`transactions:${tx.type.toLowerCase()}`)} />
-                  <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">
-                    {formatDate(tx.created_at, i18n.language)}
-                  </p>
-                </div>
-              </div>
-              <span
-                className={`shrink-0 text-xs sm:text-sm font-semibold ${
-                  tx.type === 'CREDIT'
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-error-500 dark:text-error-400'
-                }`}
-              >
-                {tx.type === 'CREDIT' ? '+' : '-'}
-                {formatCurrency(tx.amount)}
-              </span>
-            </div>
+            <TransactionItem key={tx.id} transaction={tx} size="sm" />
           ))}
         </div>
       )}

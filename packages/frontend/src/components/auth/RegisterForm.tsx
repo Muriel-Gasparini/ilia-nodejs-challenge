@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input, Card, InlineFeedback } from '@/components/ui';
 import { useRegister } from '@/hooks/use-auth';
 import { getErrorMessage } from '@/lib/errors';
 
@@ -32,6 +32,7 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange',
   });
 
   const onSubmit = (data: RegisterFormData) => {
@@ -47,9 +48,7 @@ export function RegisterForm() {
       <h2 className="mb-6 text-center text-xl font-semibold">{t('auth:signUp')}</h2>
 
       {registerMutation.error && (
-        <div className="mb-4 rounded-[var(--radius-input)] bg-error-50 p-3 text-center text-sm text-error-500 dark:bg-error-400/10">
-          {errorMessage}
-        </div>
+        <InlineFeedback variant="error" message={errorMessage!} className="mb-4" />
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">

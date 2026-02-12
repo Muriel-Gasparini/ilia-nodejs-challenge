@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Card, useToast } from '@/components/ui';
+import { Button, Input, Card, InlineFeedback } from '@/components/ui';
 import { useCurrentUser, useUpdateUser } from '@/hooks/use-user';
 import { getErrorMessage } from '@/lib/errors';
 
@@ -15,12 +15,17 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
+interface Feedback {
+  variant: 'success' | 'error';
+  message: string;
+}
+
 export function ProfileForm() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const { data: user } = useCurrentUser();
   const updateUser = useUpdateUser();
   const [editing, setEditing] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const {
     register,
@@ -29,6 +34,7 @@ export function ProfileForm() {
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
+    mode: 'onChange',
   });
 
   useEffect(() => {
@@ -41,14 +47,16 @@ export function ProfileForm() {
     }
   }, [user, reset]);
 
+  const clearFeedback = useCallback(() => setFeedback(null), []);
+
   const onSubmit = (data: ProfileFormData) => {
     updateUser.mutate(data, {
       onSuccess: () => {
-        toast(t('profile:updateSuccess'), 'success');
+        setFeedback({ variant: 'success', message: t('profile:updateSuccess') });
         setEditing(false);
       },
       onError: (error) => {
-        toast(getErrorMessage(error), 'error');
+        setFeedback({ variant: 'error', message: getErrorMessage(error) });
       },
     });
   };
@@ -62,6 +70,12 @@ export function ProfileForm() {
       });
     }
     setEditing(false);
+    setFeedback(null);
+  };
+
+  const onEdit = () => {
+    setEditing(true);
+    setFeedback(null);
   };
 
   return (
@@ -69,11 +83,21 @@ export function ProfileForm() {
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold">{t('profile:personalInfo')}</h3>
         {!editing && (
-          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+          <Button variant="ghost" size="sm" onClick={onEdit}>
             {t('edit')}
           </Button>
         )}
       </div>
+
+      {feedback && (
+        <InlineFeedback
+          variant={feedback.variant}
+          message={feedback.message}
+          className="mb-4"
+          autoDismissMs={feedback.variant === 'success' ? 5000 : 0}
+          onDismiss={clearFeedback}
+        />
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

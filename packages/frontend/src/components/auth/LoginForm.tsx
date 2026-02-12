@@ -2,8 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import { Button, Input, Card } from '@/components/ui';
+import { Link, useSearchParams } from 'react-router';
+import { Button, Input, Card, InlineFeedback } from '@/components/ui';
 import { useLogin } from '@/hooks/use-auth';
 import { getErrorMessage } from '@/lib/errors';
 
@@ -17,6 +17,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const { t } = useTranslation();
   const login = useLogin();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sessionExpired = searchParams.get('expired') === '1';
 
   const {
     register,
@@ -24,9 +26,13 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onChange',
   });
 
   const onSubmit = (data: LoginFormData) => {
+    if (sessionExpired) {
+      setSearchParams({}, { replace: true });
+    }
     login.mutate(data);
   };
 
@@ -36,11 +42,11 @@ export function LoginForm() {
     <Card variant="elevated" className="p-8">
       <h2 className="mb-6 text-center text-xl font-semibold">{t('auth:signIn')}</h2>
 
-      {login.error && (
-        <div className="mb-4 rounded-[var(--radius-input)] bg-error-50 p-3 text-center text-sm text-error-500 dark:bg-error-400/10">
-          {errorMessage}
-        </div>
+      {sessionExpired && !login.error && (
+        <InlineFeedback variant="warning" message={t('auth:sessionExpired')} className="mb-4" />
       )}
+
+      {login.error && <InlineFeedback variant="error" message={errorMessage!} className="mb-4" />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Input

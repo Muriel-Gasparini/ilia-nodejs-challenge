@@ -36,7 +36,8 @@ export function RegisterForm() {
   });
 
   const onSubmit = (data: RegisterFormData) => {
-    const { confirm_password: _, ...payload } = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirm_password, ...payload } = data;
     registerMutation.mutate(payload);
   };
 
@@ -97,7 +98,12 @@ export function RegisterForm() {
           error={errors.confirm_password ? t(errors.confirm_password.message!) : undefined}
           {...register('confirm_password')}
         />
-        <Button type="submit" size="lg" isLoading={registerMutation.isPending} className="mt-2 w-full">
+        <Button
+          type="submit"
+          size="lg"
+          isLoading={registerMutation.isPending}
+          className="mt-2 w-full"
+        >
           {t('auth:signUp')}
         </Button>
       </form>

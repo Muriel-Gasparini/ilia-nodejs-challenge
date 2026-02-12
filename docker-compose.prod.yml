@@ -90,6 +90,19 @@ services:
       retries: 5
       start_period: 30s
 
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    container_name: ilia-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      ms-users:
+        condition: service_healthy
+    networks:
+      - ilia-network
+
 networks:
   ilia-network:
     driver: bridge

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ThemeToggle, LanguageSwitcher } from '@/components/ui';
+import { AppLogo } from '@/components/ui/AppLogo';
 import { useAuthStore } from '@/stores/auth.store';
 import { useLogout } from '@/hooks/use-auth';
 
@@ -13,22 +14,8 @@ export function Header() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-[var(--border-secondary)] bg-[var(--bg-secondary)] px-6">
-      <div className="flex items-center gap-2 lg:hidden">
-        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#49cc68" />
-          <text
-            x="16"
-            y="22"
-            textAnchor="middle"
-            fontFamily="Inter, sans-serif"
-            fontWeight="700"
-            fontSize="18"
-            fill="white"
-          >
-            W
-          </text>
-        </svg>
-        <span className="text-lg font-bold">{t('appName')}</span>
+      <div className="lg:hidden">
+        <AppLogo size="sm" />
       </div>
 
       <div className="hidden lg:block" />

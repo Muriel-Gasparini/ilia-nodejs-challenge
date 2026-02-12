@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 const navItems = [
   { to: '/dashboard', labelKey: 'dashboard:title', icon: DashboardIcon },
@@ -13,22 +14,8 @@ export function Sidebar() {
 
   return (
     <aside className="hidden w-60 shrink-0 border-r border-[var(--border-secondary)] bg-[var(--bg-secondary)] lg:block">
-      <div className="flex h-16 items-center gap-2 px-6">
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#49cc68" />
-          <text
-            x="16"
-            y="22"
-            textAnchor="middle"
-            fontFamily="Inter, sans-serif"
-            fontWeight="700"
-            fontSize="18"
-            fill="white"
-          >
-            W
-          </text>
-        </svg>
-        <span className="text-lg font-bold">{t('appName')}</span>
+      <div className="flex h-16 items-center px-6">
+        <AppLogo />
       </div>
 
       <nav className="mt-4 flex flex-col gap-1 px-3">

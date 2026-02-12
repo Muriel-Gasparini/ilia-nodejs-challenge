@@ -1,9 +1,9 @@
 {
-  "required": "Este campo e obrigatorio",
-  "invalidEmail": "Digite um email valido",
-  "minLength": "Deve ter no minimo {{min}} caracteres",
-  "passwordMismatch": "As senhas nao conferem",
-  "minAmount": "Valor minimo e R$ 0,01",
-  "maxAmount": "Valor maximo e R$ 999.999.999,99",
-  "invalidAmount": "Digite um valor valido"
+  "required": "Este campo é obrigatório",
+  "invalidEmail": "Digite um email válido",
+  "minLength": "Deve ter no mínimo {{min}} caracteres",
+  "passwordMismatch": "As senhas não conferem",
+  "minAmount": "Valor mínimo é R$ 0,01",
+  "maxAmount": "Valor máximo é R$ 999.999.999,99",
+  "invalidAmount": "Digite um valor válido"
 }

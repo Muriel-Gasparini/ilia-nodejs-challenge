@@ -18,7 +18,10 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException({
+        code: 'EMAIL_EXISTS',
+        message: 'Email already exists',
+      });
     }
 
     const hashedPassword = await argon2.hash(createUserDto.password);
@@ -67,7 +70,10 @@ export class UsersService {
 
   async findOne(id: string, requestingUserId?: string) {
     if (requestingUserId && id !== requestingUserId) {
-      throw new ForbiddenException('You can only view your own profile');
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'You can only view your own profile',
+      });
     }
 
     return await this.prisma.user.findUniqueOrThrow({
@@ -90,7 +96,10 @@ export class UsersService {
     requestingUserId?: string,
   ) {
     if (requestingUserId && id !== requestingUserId) {
-      throw new ForbiddenException('You can only update your own profile');
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'You can only update your own profile',
+      });
     }
 
     if (updateUserDto.email) {
@@ -99,7 +108,10 @@ export class UsersService {
       });
 
       if (existingUser && existingUser.id !== id) {
-        throw new ConflictException('Email already exists');
+        throw new ConflictException({
+          code: 'EMAIL_EXISTS',
+          message: 'Email already exists',
+        });
       }
     }
 
@@ -126,7 +138,10 @@ export class UsersService {
 
   async remove(id: string, requestingUserId?: string) {
     if (requestingUserId && id !== requestingUserId) {
-      throw new ForbiddenException('You can only delete your own account');
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'You can only delete your own account',
+      });
     }
 
     return await this.prisma.user.delete({

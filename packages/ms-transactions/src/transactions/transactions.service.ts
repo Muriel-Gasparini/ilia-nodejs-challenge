@@ -61,7 +61,10 @@ export class TransactionsService {
               available_balance: balanceNumber,
               idempotency_key,
             });
-            throw new BadRequestException('Insufficient funds');
+            throw new BadRequestException({
+              code: 'INSUFFICIENT_FUNDS',
+              message: 'Insufficient funds',
+            });
           }
         }
 

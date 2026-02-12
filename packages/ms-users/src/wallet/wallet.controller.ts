@@ -23,7 +23,10 @@ export class WalletController {
     requestedUserId: string,
   ) {
     if (authenticatedUserId !== requestedUserId) {
-      throw new ForbiddenException('You can only access your own wallet');
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'You can only access your own wallet',
+      });
     }
   }
 

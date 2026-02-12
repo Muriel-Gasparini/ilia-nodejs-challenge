@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNotEmpty, IsUUID, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsNotEmpty, IsUUID, Min } from 'class-validator';
 
 export enum TransactionType {
   CREDIT = 'CREDIT',
@@ -10,8 +10,8 @@ export class TransactionRequestDto {
   @IsNotEmpty()
   user_id: string;
 
-  @IsInt()
-  @Min(1)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
   amount: number;
 
   @IsEnum(TransactionType)

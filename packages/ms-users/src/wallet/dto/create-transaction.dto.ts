@@ -1,9 +1,9 @@
-import { IsEnum, IsInt, Min, IsUUID, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNumber, Min, IsUUID, IsNotEmpty } from 'class-validator';
 import { TransactionType } from '../../transactions-client/dto/transaction-request.dto';
 
 export class CreateTransactionDto {
-  @IsInt()
-  @Min(1)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
   amount: number;
 
   @IsEnum(TransactionType)

@@ -16,8 +16,11 @@ export class TransactionsController {
   }
 
   @Get()
-  async findAll(@Query('type') type?: TransactionType) {
-    return this.transactionsService.findAll(undefined, type);
+  async findAll(
+    @Query('user_id') userId?: string,
+    @Query('type') type?: TransactionType,
+  ) {
+    return this.transactionsService.findAll(userId, type);
   }
 }
 

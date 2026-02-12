@@ -8,6 +8,7 @@
   "RATE_LIMITED": "Too many attempts. Please wait and try again",
   "SERVICE_UNAVAILABLE": "Service temporarily unavailable. Please try again",
   "UNAUTHORIZED": "Your session has expired. Please log in again",
+  "USER_NOT_FOUND": "User not found",
   "RESOURCE_NOT_FOUND": "The requested resource was not found",
   "INTERNAL_ERROR": "An unexpected error occurred",
   "UNKNOWN": "An unexpected error occurred"

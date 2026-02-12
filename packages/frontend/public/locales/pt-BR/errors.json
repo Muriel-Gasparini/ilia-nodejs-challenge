@@ -8,6 +8,7 @@
   "RATE_LIMITED": "Muitas tentativas. Aguarde e tente novamente",
   "SERVICE_UNAVAILABLE": "Serviço temporariamente indisponível. Tente novamente",
   "UNAUTHORIZED": "Sua sessão expirou. Faça login novamente",
+  "USER_NOT_FOUND": "Usuário não encontrado",
   "RESOURCE_NOT_FOUND": "O recurso solicitado não foi encontrado",
   "INTERNAL_ERROR": "Ocorreu um erro inesperado",
   "UNKNOWN": "Ocorreu um erro inesperado"

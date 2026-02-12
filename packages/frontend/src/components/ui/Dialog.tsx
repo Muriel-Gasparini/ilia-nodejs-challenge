@@ -20,10 +20,12 @@ export function DialogContent({
   children,
   className,
   title,
+  titleClassName,
 }: {
   children: ReactNode;
   className?: string;
   title: ReactNode;
+  titleClassName?: string;
 }) {
   return (
     <DialogPrimitive.Portal>
@@ -35,7 +37,9 @@ export function DialogContent({
           className,
         )}
       >
-        <DialogPrimitive.Title className="mb-4 text-lg font-semibold text-[var(--text-primary)]">
+        <DialogPrimitive.Title
+          className={cn('mb-4 text-lg font-semibold text-[var(--text-primary)]', titleClassName)}
+        >
           {title}
         </DialogPrimitive.Title>
         {children}

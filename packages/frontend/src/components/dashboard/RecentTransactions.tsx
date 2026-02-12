@@ -6,9 +6,9 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 
 export function RecentTransactions() {
   const { t, i18n } = useTranslation('dashboard');
-  const { data: transactions, isLoading } = useTransactions();
+  const { data: response, isLoading } = useTransactions(undefined, 1, 5);
 
-  const recent = transactions?.slice(0, 5);
+  const recent = response?.data;
 
   return (
     <Card>

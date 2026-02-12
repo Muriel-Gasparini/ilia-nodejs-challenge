@@ -25,7 +25,7 @@ export function TransactionResult({
 
   useEffect(() => {
     if (status === 'success') {
-      const timer = setTimeout(onClose, 2000);
+      const timer = setTimeout(onClose, 1200);
       return () => clearTimeout(timer);
     }
   }, [status, onClose]);

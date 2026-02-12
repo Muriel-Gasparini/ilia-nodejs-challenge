@@ -23,7 +23,7 @@ export function DialogContent({
 }: {
   children: ReactNode;
   className?: string;
-  title: string;
+  title: ReactNode;
 }) {
   return (
     <DialogPrimitive.Portal>

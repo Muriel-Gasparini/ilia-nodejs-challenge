@@ -26,7 +26,7 @@ export function TransactionFilters({ value, onChange }: TransactionFiltersProps)
             value={filter.value}
             className={cn(
               'flex-1 rounded-[var(--radius-sm)] px-4 py-2 text-sm font-medium transition-colors',
-              'data-[state=active]:bg-primary-400 data-[state=active]:text-white',
+              'data-[state=active]:bg-primary-600 data-[state=active]:text-white dark:data-[state=active]:bg-primary-400 dark:data-[state=active]:text-neutral-950',
               'data-[state=inactive]:text-[var(--text-secondary)] data-[state=inactive]:hover:text-[var(--text-primary)]',
             )}
           >

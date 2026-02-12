@@ -2,7 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/stores/auth.store';
-import type { BalanceResponse, Transaction, TransactionType, CreateTransactionRequest } from '@/types/api';
+import type {
+  BalanceResponse,
+  Transaction,
+  TransactionType,
+  CreateTransactionRequest,
+} from '@/types/api';
 
 export function useBalance() {
   const user = useAuthStore((s) => s.user);

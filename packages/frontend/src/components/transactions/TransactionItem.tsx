@@ -31,7 +31,9 @@ export function TransactionItem({ transaction: tx }: TransactionItemProps) {
       </div>
       <span
         className={`text-base font-semibold ${
-          tx.type === 'CREDIT' ? 'text-primary-600 dark:text-primary-400' : 'text-error-400'
+          tx.type === 'CREDIT'
+            ? 'text-primary-600 dark:text-primary-400'
+            : 'text-error-500 dark:text-error-400'
         }`}
       >
         {tx.type === 'CREDIT' ? '+' : '-'}

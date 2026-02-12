@@ -16,7 +16,7 @@ export function RecentTransactions() {
         <h3 className="text-base font-semibold">{t('recentTransactions')}</h3>
         <Link
           to="/transactions"
-          className="text-sm font-medium text-primary-400 hover:underline"
+          className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-400"
         >
           {t('viewAll')}
         </Link>
@@ -29,10 +29,7 @@ export function RecentTransactions() {
           ))}
         </div>
       ) : !recent?.length ? (
-        <EmptyState
-          title={t('noTransactions')}
-          description={t('noTransactionsDescription')}
-        />
+        <EmptyState title={t('noTransactions')} description={t('noTransactionsDescription')} />
       ) : (
         <div className="flex flex-col divide-y divide-[var(--border-secondary)]">
           {recent.map((tx) => (
@@ -48,10 +45,7 @@ export function RecentTransactions() {
                   {tx.type === 'CREDIT' ? '↑' : '↓'}
                 </div>
                 <div>
-                  <Badge
-                    type={tx.type}
-                    label={t(`transactions:${tx.type.toLowerCase()}`)}
-                  />
+                  <Badge type={tx.type} label={t(`transactions:${tx.type.toLowerCase()}`)} />
                   <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">
                     {formatDate(tx.created_at, i18n.language)}
                   </p>
@@ -59,7 +53,9 @@ export function RecentTransactions() {
               </div>
               <span
                 className={`text-sm font-semibold ${
-                  tx.type === 'CREDIT' ? 'text-primary-600 dark:text-primary-400' : 'text-error-400'
+                  tx.type === 'CREDIT'
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-error-500 dark:text-error-400'
                 }`}
               >
                 {tx.type === 'CREDIT' ? '+' : '-'}

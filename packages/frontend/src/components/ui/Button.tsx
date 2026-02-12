@@ -13,13 +13,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary-400 text-white hover:bg-primary-500 active:bg-primary-600 dark:bg-primary-400 dark:text-neutral-950 dark:hover:bg-primary-500',
+    'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 dark:bg-primary-400 dark:text-neutral-950 dark:hover:bg-primary-500',
   secondary:
-    'border-2 border-primary-400 text-primary-400 hover:bg-primary-50 active:bg-primary-100 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-400/10',
+    'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 active:bg-primary-100 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-400/10',
   ghost:
     'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] active:bg-neutral-200 dark:active:bg-neutral-700',
-  danger:
-    'bg-error-400 text-white hover:bg-error-500 active:bg-error-600',
+  danger: 'bg-error-500 text-white hover:bg-error-600 active:bg-error-600',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -29,7 +28,10 @@ const sizeStyles: Record<ButtonSize, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, disabled, children, ...props }, ref) => {
+  (
+    { className, variant = 'primary', size = 'md', isLoading, disabled, children, ...props },
+    ref,
+  ) => {
     return (
       <button
         ref={ref}

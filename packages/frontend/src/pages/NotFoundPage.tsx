@@ -10,7 +10,7 @@ export default function NotFoundPage() {
       <p className="text-lg text-[var(--text-secondary)]">{t('pageNotFound')}</p>
       <Link
         to="/dashboard"
-        className="rounded-[var(--radius-pill)] bg-primary-400 px-6 py-2 font-medium text-white transition-colors hover:bg-primary-500"
+        className="rounded-[var(--radius-pill)] bg-primary-600 px-6 py-2 font-medium text-white transition-colors hover:bg-primary-700 dark:bg-primary-400 dark:text-neutral-950 dark:hover:bg-primary-500"
       >
         {t('goHome')}
       </Link>

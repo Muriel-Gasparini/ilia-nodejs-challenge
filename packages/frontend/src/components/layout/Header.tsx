@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ThemeToggle, LanguageSwitcher } from '@/components/ui';
 import { useAuthStore } from '@/stores/auth.store';
@@ -6,6 +7,7 @@ import { useLogout } from '@/hooks/use-auth';
 
 export function Header() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
 
@@ -14,7 +16,17 @@ export function Header() {
       <div className="flex items-center gap-2 lg:hidden">
         <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
           <rect width="32" height="32" rx="8" fill="#49cc68" />
-          <text x="16" y="22" textAnchor="middle" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="18" fill="white">W</text>
+          <text
+            x="16"
+            y="22"
+            textAnchor="middle"
+            fontFamily="Inter, sans-serif"
+            fontWeight="700"
+            fontSize="18"
+            fill="white"
+          >
+            W
+          </text>
         </svg>
         <span className="text-lg font-bold">{t('appName')}</span>
       </div>
@@ -41,13 +53,13 @@ export function Header() {
             >
               <DropdownMenu.Item
                 className="flex cursor-pointer items-center rounded-[var(--radius-sm)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none data-[highlighted]:bg-[var(--bg-tertiary)]"
-                onSelect={() => (window.location.href = '/profile')}
+                onSelect={() => navigate('/profile')}
               >
                 {t('profile:title')}
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="my-1 h-px bg-[var(--border-secondary)]" />
               <DropdownMenu.Item
-                className="flex cursor-pointer items-center rounded-[var(--radius-sm)] px-3 py-2 text-sm text-error-400 outline-none data-[highlighted]:bg-error-50 dark:data-[highlighted]:bg-error-400/10"
+                className="flex cursor-pointer items-center rounded-[var(--radius-sm)] px-3 py-2 text-sm text-error-500 outline-none data-[highlighted]:bg-error-50 dark:text-error-400 dark:data-[highlighted]:bg-error-400/10"
                 onSelect={logout}
               >
                 Logout

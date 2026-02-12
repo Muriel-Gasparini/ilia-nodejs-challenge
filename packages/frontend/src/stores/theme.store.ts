@@ -16,8 +16,7 @@ function getMediaQuery() {
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  const isDark =
-    theme === 'dark' || (theme === 'system' && (getMediaQuery()?.matches ?? false));
+  const isDark = theme === 'dark' || (theme === 'system' && (getMediaQuery()?.matches ?? false));
 
   root.classList.toggle('dark', isDark);
 }

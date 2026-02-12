@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui';
-import { TransactionFilters, TransactionList, CreateTransactionDialog } from '@/components/transactions';
+import {
+  TransactionFilters,
+  TransactionList,
+  CreateTransactionDialog,
+} from '@/components/transactions';
 
 export default function TransactionsPage() {
   const { t } = useTranslation('transactions');

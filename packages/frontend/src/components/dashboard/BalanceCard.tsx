@@ -8,15 +8,15 @@ export function BalanceCard() {
   const { data, isLoading } = useBalance();
 
   return (
-    <Card className="relative overflow-hidden bg-gradient-to-br from-primary-400 to-primary-600 text-white">
-      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/10" />
-      <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-white/5" />
+    <Card className="relative overflow-hidden bg-neutral-900 text-white dark:bg-neutral-800">
+      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary-400/10" />
+      <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-primary-400/5" />
       <div className="relative">
-        <p className="text-sm font-medium text-white/80">{t('balance')}</p>
+        <p className="text-sm font-medium text-neutral-400">{t('balance')}</p>
         {isLoading ? (
-          <Skeleton className="mt-2 h-10 w-48 bg-white/20" />
+          <Skeleton className="mt-2 h-10 w-48 bg-white/10" />
         ) : (
-          <p className="mt-1 text-4xl font-bold tracking-tight">
+          <p className="mt-1 text-4xl font-bold tracking-tight text-primary-400">
             {formatCurrency(data?.balance ?? 0, i18n.language)}
           </p>
         )}

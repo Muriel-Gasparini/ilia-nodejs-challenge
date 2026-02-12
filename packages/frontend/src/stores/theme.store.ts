@@ -8,10 +8,16 @@ interface ThemeState {
   setTheme: (theme: Theme) => void;
 }
 
+function getMediaQuery() {
+  return typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
+}
+
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
   const isDark =
-    theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    theme === 'dark' || (theme === 'system' && (getMediaQuery()?.matches ?? false));
 
   root.classList.toggle('dark', isDark);
 }
@@ -37,7 +43,7 @@ export const useThemeStore = create<ThemeState>()(
 );
 
 // Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+getMediaQuery()?.addEventListener('change', () => {
   const { theme } = useThemeStore.getState();
   if (theme === 'system') {
     applyTheme('system');

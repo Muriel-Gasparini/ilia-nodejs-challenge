@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth.store';
+import { getErrorMessage } from '@/lib/errors';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -22,6 +23,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const { isAuthenticated, logout } = useAuthStore.getState();
       if (isAuthenticated) {
+        const message = getErrorMessage(error);
+        window.dispatchEvent(
+          new CustomEvent('app:toast', { detail: { message, variant: 'error' } }),
+        );
         logout();
       }
     }

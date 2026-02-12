@@ -59,7 +59,7 @@ export function RecentTransactions() {
                 }`}
               >
                 {tx.type === 'CREDIT' ? '+' : '-'}
-                {formatCurrency(tx.amount, i18n.language)}
+                {formatCurrency(tx.amount)}
               </span>
             </div>
           ))}

@@ -4,7 +4,7 @@ import { useBalance } from '@/hooks/use-wallet';
 import { formatCurrency } from '@/lib/utils';
 
 export function BalanceCard() {
-  const { t, i18n } = useTranslation('dashboard');
+  const { t } = useTranslation('dashboard');
   const { data, isLoading } = useBalance();
 
   return (
@@ -17,7 +17,7 @@ export function BalanceCard() {
           <Skeleton className="mt-2 h-10 w-48 bg-white/10" />
         ) : (
           <p className="mt-1 text-[clamp(1.25rem,5.5vw,2.25rem)] font-bold tracking-tight text-primary-400">
-            {formatCurrency(data?.balance ?? 0, i18n.language)}
+            {formatCurrency(data?.balance ?? 0)}
           </p>
         )}
       </div>

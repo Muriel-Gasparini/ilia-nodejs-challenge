@@ -3,9 +3,11 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ErrorCode } from '../common/errors/error-codes';
 import * as argon2 from 'argon2';
 
 @Injectable()
@@ -15,21 +17,34 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await argon2.hash(createUserDto.password);
 
-    return await this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        first_name: true,
-        last_name: true,
-        email: true,
-        created_at: true,
-        updated_at: true,
-        password: false,
-      },
-    });
+    try {
+      return await this.prisma.user.create({
+        data: {
+          ...createUserDto,
+          password: hashedPassword,
+        },
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          created_at: true,
+          updated_at: true,
+          password: false,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException({
+          code: ErrorCode.REGISTRATION_FAILED,
+          message: 'Unable to complete registration',
+        });
+      }
+      throw error;
+    }
   }
 
   async exists(id: string): Promise<boolean> {

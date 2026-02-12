@@ -13,17 +13,6 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException({
-        code: 'EMAIL_EXISTS',
-        message: 'Email already exists',
-      });
-    }
-
     const hashedPassword = await argon2.hash(createUserDto.password);
 
     return await this.prisma.user.create({
@@ -39,23 +28,6 @@ export class UsersService {
         created_at: true,
         updated_at: true,
         password: false,
-      },
-    });
-  }
-
-  async findAll() {
-    return await this.prisma.user.findMany({
-      select: {
-        id: true,
-        first_name: true,
-        last_name: true,
-        email: true,
-        created_at: true,
-        updated_at: true,
-        password: false,
-      },
-      orderBy: {
-        created_at: 'desc',
       },
     });
   }
@@ -102,37 +74,39 @@ export class UsersService {
       });
     }
 
-    if (updateUserDto.email) {
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: updateUserDto.email },
-      });
-
-      if (existingUser && existingUser.id !== id) {
-        throw new ConflictException({
-          code: 'EMAIL_EXISTS',
-          message: 'Email already exists',
-        });
-      }
-    }
-
     const data = { ...updateUserDto };
 
     if (updateUserDto.password) {
       data.password = await argon2.hash(updateUserDto.password);
     }
 
-    return await this.prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        first_name: true,
-        last_name: true,
-        email: true,
-        created_at: true,
-        updated_at: true,
-        password: false,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      if (updateUserDto.email) {
+        const existing = await tx.user.findUnique({
+          where: { email: updateUserDto.email },
+        });
+
+        if (existing && existing.id !== id) {
+          throw new ConflictException({
+            code: 'EMAIL_EXISTS',
+            message: 'Email already exists',
+          });
+        }
+      }
+
+      return tx.user.update({
+        where: { id },
+        data,
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          created_at: true,
+          updated_at: true,
+          password: false,
+        },
+      });
     });
   }
 

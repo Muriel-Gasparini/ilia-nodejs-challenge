@@ -12,5 +12,8 @@
   "insufficientFunds": "Saldo insuficiente",
   "noTransactions": "Nenhuma transação encontrada",
   "noCredits": "Nenhuma transação de crédito",
-  "noDebits": "Nenhuma transação de débito"
+  "noDebits": "Nenhuma transação de débito",
+  "paginationInfo": "{{from}}-{{to}} de {{total}}",
+  "previous": "Anterior",
+  "next": "Próxima"
 }

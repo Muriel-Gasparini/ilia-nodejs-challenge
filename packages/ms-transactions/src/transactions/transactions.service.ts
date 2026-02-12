@@ -107,36 +107,52 @@ export class TransactionsService {
     }
   }
 
-  async findAll(userId?: string, type?: TransactionType) {
+  async findAll(userId: string, type?: TransactionType, page = 1, limit = 20) {
     this.logger.log({
       message: 'Fetching transactions',
-      filters: { type },
+      filters: { userId, type, page, limit },
     });
 
-    const transactions = await this.prisma.transaction.findMany({
-      where: {
-        ...(userId && { user_id: userId }),
-        ...(type && { type }),
-      },
-      select: {
-        id: true,
-        user_id: true,
-        amount: true,
-        type: true,
-        idempotency_key: true,
-        created_at: true,
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+    const where = {
+      user_id: userId,
+      ...(type && { type }),
+    };
+
+    const [transactions, total] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where,
+        select: {
+          id: true,
+          user_id: true,
+          amount: true,
+          type: true,
+          idempotency_key: true,
+          created_at: true,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.transaction.count({ where }),
+    ]);
 
     this.logger.log({
       message: 'Transactions fetched',
       count: transactions.length,
+      total,
     });
 
-    return transactions;
+    return {
+      data: transactions,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async getBalance(userId: string, tx?: PrismaTransaction) {
@@ -145,7 +161,7 @@ export class TransactionsService {
     });
 
     const prisma = tx || this.prisma;
-    const result = await prisma.$queryRaw<Array<{ amount: any }>>`
+    const result = await prisma.$queryRaw<Array<{ amount: string | number }>>`
       SELECT
         COALESCE(SUM(CASE WHEN type = 'CREDIT' THEN amount ELSE 0 END), 0) -
         COALESCE(SUM(CASE WHEN type = 'DEBIT' THEN amount ELSE 0 END), 0) as amount

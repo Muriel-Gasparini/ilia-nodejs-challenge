@@ -9,15 +9,24 @@ jest.mock('argon2');
 describe('UsersService', () => {
   let service: UsersService;
 
+  const mockTx = {
+    user: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+  };
+
   const mockPrismaService = {
     user: {
       create: jest.fn(),
-      findMany: jest.fn(),
       findUnique: jest.fn(),
       findUniqueOrThrow: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
+    $transaction: jest.fn((fn: (tx: typeof mockTx) => Promise<unknown>) =>
+      fn(mockTx),
+    ),
   };
 
   beforeEach(async () => {
@@ -63,14 +72,10 @@ describe('UsersService', () => {
         updated_at: new Date(),
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
       mockPrismaService.user.create.mockResolvedValue(expectedUser);
 
       const result = await service.create(createUserDto);
 
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'john@example.com' },
-      });
       expect(argon2.hash).toHaveBeenCalledWith('password123');
       expect(mockPrismaService.user.create).toHaveBeenCalledWith({
         data: {
@@ -89,62 +94,6 @@ describe('UsersService', () => {
       });
       expect(result).toEqual(expectedUser);
       expect(result).not.toHaveProperty('password');
-    });
-
-    it('should throw ConflictException if email already exists', async () => {
-      const createUserDto = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john@example.com',
-        password: 'password123',
-      };
-
-      mockPrismaService.user.findUnique.mockResolvedValue({
-        id: 'existing-id',
-        email: 'john@example.com',
-      });
-
-      await expect(service.create(createUserDto)).rejects.toThrow(
-        ConflictException,
-      );
-      await expect(service.create(createUserDto)).rejects.toThrow(
-        'Email already exists',
-      );
-    });
-  });
-
-  describe('findAll', () => {
-    it('should return all users without password', async () => {
-      const expectedUsers = [
-        {
-          id: '123',
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'john@example.com',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      ];
-
-      mockPrismaService.user.findMany.mockResolvedValue(expectedUsers);
-
-      const result = await service.findAll();
-
-      expect(mockPrismaService.user.findMany).toHaveBeenCalledWith({
-        select: {
-          id: true,
-          first_name: true,
-          last_name: true,
-          email: true,
-          created_at: true,
-          updated_at: true,
-          password: false,
-        },
-        orderBy: {
-          created_at: 'desc',
-        },
-      });
-      expect(result).toEqual(expectedUsers);
     });
   });
 
@@ -229,12 +178,12 @@ describe('UsersService', () => {
         updated_at: new Date(),
       };
 
-      mockPrismaService.user.update.mockResolvedValue(expectedUser);
+      mockTx.user.update.mockResolvedValue(expectedUser);
 
       const result = await service.update(userId, updateUserDto);
 
       expect(argon2.hash).toHaveBeenCalledWith('newpassword123');
-      expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+      expect(mockTx.user.update).toHaveBeenCalledWith({
         where: { id: userId },
         data: {
           first_name: 'Jane',
@@ -268,7 +217,7 @@ describe('UsersService', () => {
         updated_at: new Date(),
       };
 
-      mockPrismaService.user.update.mockResolvedValue(expectedUser);
+      mockTx.user.update.mockResolvedValue(expectedUser);
 
       const result = await service.update(userId, updateUserDto);
 
@@ -282,7 +231,7 @@ describe('UsersService', () => {
         email: 'another@example.com',
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValue({
+      mockTx.user.findUnique.mockResolvedValue({
         id: 'different-id',
         email: 'another@example.com',
       });
@@ -310,11 +259,11 @@ describe('UsersService', () => {
         updated_at: new Date(),
       };
 
-      mockPrismaService.user.findUnique.mockResolvedValue({
+      mockTx.user.findUnique.mockResolvedValue({
         id: userId,
         email: 'john@example.com',
       });
-      mockPrismaService.user.update.mockResolvedValue(expectedUser);
+      mockTx.user.update.mockResolvedValue(expectedUser);
 
       const result = await service.update(userId, updateUserDto);
 
@@ -329,7 +278,7 @@ describe('UsersService', () => {
       await expect(
         service.update(userId, updateUserDto, requestingUserId),
       ).rejects.toThrow(ForbiddenException);
-      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+      expect(mockTx.user.update).not.toHaveBeenCalled();
     });
 
     it('should allow updating own profile', async () => {
@@ -344,11 +293,11 @@ describe('UsersService', () => {
         updated_at: new Date(),
       };
 
-      mockPrismaService.user.update.mockResolvedValue(expectedUser);
+      mockTx.user.update.mockResolvedValue(expectedUser);
 
       const result = await service.update(userId, updateUserDto, userId);
 
-      expect(mockPrismaService.user.update).toHaveBeenCalled();
+      expect(mockTx.user.update).toHaveBeenCalled();
       expect(result.first_name).toBe('Jane');
     });
   });

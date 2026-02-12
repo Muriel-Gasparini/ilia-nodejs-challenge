@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { FindAllTransactionsDto } from './dto/find-all-transactions.dto';
 import { GetBalanceDto } from './dto/get-balance.dto';
-import { TransactionType } from '../../generated/prisma';
 import { JwtOrInternalAuthGuard } from '../auth/guards/jwt-or-internal-auth.guard';
 
 @Controller('transactions')
@@ -16,11 +16,13 @@ export class TransactionsController {
   }
 
   @Get()
-  async findAll(
-    @Query('user_id') userId?: string,
-    @Query('type') type?: TransactionType,
-  ) {
-    return this.transactionsService.findAll(userId, type);
+  async findAll(@Query() query: FindAllTransactionsDto) {
+    return this.transactionsService.findAll(
+      query.user_id,
+      query.type,
+      query.page ?? 1,
+      query.limit ?? 20,
+    );
   }
 }
 

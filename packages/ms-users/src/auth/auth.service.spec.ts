@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +23,10 @@ describe('AuthService', () => {
     sign: jest.fn(),
   };
 
+  const mockConfigService = {
+    getOrThrow: jest.fn().mockReturnValue('test-secret'),
+  };
+
   beforeEach(async () => {
     process.env.JWT_SECRET = 'test-secret';
 
@@ -35,6 +40,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -135,14 +144,15 @@ describe('AuthService', () => {
       expect(jwtService.sign).not.toHaveBeenCalled();
     });
 
-    it('should use JWT_SECRET from environment', async () => {
-      process.env.JWT_SECRET = 'custom_secret';
+    it('should use JWT_SECRET from ConfigService', async () => {
+      mockConfigService.getOrThrow.mockReturnValue('custom_secret');
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
       mockJwtService.sign.mockReturnValue('mock_token');
 
       await service.login(loginDto);
 
+      expect(mockConfigService.getOrThrow).toHaveBeenCalledWith('JWT_SECRET');
       expect(jwtService.sign).toHaveBeenCalledWith(
         { sub: mockUser.id, username: mockUser.email },
         {
@@ -150,8 +160,6 @@ describe('AuthService', () => {
           expiresIn: '24h',
         },
       );
-
-      delete process.env.JWT_SECRET;
     });
   });
 });

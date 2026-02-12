@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -23,6 +24,10 @@ describe('AuthController', () => {
     sign: jest.fn(),
   };
 
+  const mockConfigService = {
+    getOrThrow: jest.fn().mockReturnValue('test-secret'),
+  };
+
   beforeEach(async () => {
     process.env.JWT_SECRET = 'test-secret';
 
@@ -37,6 +42,10 @@ describe('AuthController', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

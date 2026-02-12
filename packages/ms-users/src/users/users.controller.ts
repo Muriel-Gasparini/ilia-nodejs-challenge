@@ -28,12 +28,7 @@ export class UsersController {
 
   @Get('me')
   getCurrentUser(@CurrentUser() user: { userId: string; email?: string }) {
-    return this.usersService.findOne(user.userId);
-  }
-
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+    return this.usersService.findOne(user.userId, user.userId);
   }
 
   @Get(':id')

@@ -27,6 +27,7 @@ describe('TransactionsService', () => {
       create: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -208,9 +209,23 @@ describe('TransactionsService', () => {
   });
 
   describe('findAll', () => {
-    it('should filter by user_id', async () => {
-      const userId = '123e4567-e89b-12d3-a456-426614174000';
+    const userId = '123e4567-e89b-12d3-a456-426614174000';
+
+    it('should return paginated response with meta', async () => {
       mockPrismaService.transaction.findMany.mockResolvedValue([]);
+      mockPrismaService.transaction.count.mockResolvedValue(0);
+
+      const result = await service.findAll(userId);
+
+      expect(result).toEqual({
+        data: [],
+        meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
+      });
+    });
+
+    it('should filter by user_id', async () => {
+      mockPrismaService.transaction.findMany.mockResolvedValue([]);
+      mockPrismaService.transaction.count.mockResolvedValue(0);
 
       await service.findAll(userId);
 
@@ -226,16 +241,38 @@ describe('TransactionsService', () => {
 
     it('should filter by type', async () => {
       mockPrismaService.transaction.findMany.mockResolvedValue([]);
+      mockPrismaService.transaction.count.mockResolvedValue(0);
 
-      await service.findAll(undefined, TransactionType.CREDIT);
+      await service.findAll(userId, TransactionType.CREDIT);
 
       expect(mockPrismaService.transaction.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
+            user_id: userId,
             type: TransactionType.CREDIT,
           }) as Record<string, unknown>,
         }) as Record<string, unknown>,
       );
+    });
+
+    it('should apply pagination with skip and take', async () => {
+      mockPrismaService.transaction.findMany.mockResolvedValue([]);
+      mockPrismaService.transaction.count.mockResolvedValue(50);
+
+      const result = await service.findAll(userId, undefined, 3, 10);
+
+      expect(mockPrismaService.transaction.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 20,
+          take: 10,
+        }) as Record<string, unknown>,
+      );
+      expect(result.meta).toEqual({
+        total: 50,
+        page: 3,
+        limit: 10,
+        totalPages: 5,
+      });
     });
   });
 });

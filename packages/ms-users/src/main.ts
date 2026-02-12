@@ -31,4 +31,7 @@ async function bootstrap() {
 
   console.log(`[MS-Users] Server running on port ${port}`);
 }
-void bootstrap();
+bootstrap().catch((err) => {
+  console.error('Failed to start:', err);
+  process.exit(1);
+});

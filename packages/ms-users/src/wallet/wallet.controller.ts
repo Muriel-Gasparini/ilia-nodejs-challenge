@@ -57,9 +57,16 @@ export class WalletController {
     @CurrentUser() user: { userId: string },
     @Param('userId') userId: string,
     @Query('type') type?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     await this.validateOwnership(user.userId, userId);
-    return this.transactionsClient.getTransactions(userId, type);
+    return this.transactionsClient.getTransactions(
+      userId,
+      type,
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 20,
+    );
   }
 
   @Post('transactions')

@@ -7,14 +7,20 @@ import {
   HttpException,
   Logger,
   ServiceUnavailableException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { TransactionRequestDto } from './dto/transaction-request.dto';
 import { BalanceResponseDto } from './dto/balance-response.dto';
-import { TransactionResponseDto } from './dto/transaction-response.dto';
+import {
+  TransactionResponseDto,
+  PaginatedTransactionsResponse,
+} from './dto/transaction-response.dto';
 
 @Injectable()
 export class TransactionsClientService {
@@ -25,13 +31,10 @@ export class TransactionsClientService {
   constructor(
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {
-    if (!process.env.JWT_INTERNAL_SECRET) {
-      throw new Error('JWT_INTERNAL_SECRET environment variable is required');
-    }
-    this.msTransactionsUrl =
-      process.env.MS_TRANSACTIONS_URL || 'http://localhost:3001';
-    this.jwtInternalSecret = process.env.JWT_INTERNAL_SECRET;
+    this.msTransactionsUrl = config.getOrThrow('MS_TRANSACTIONS_URL');
+    this.jwtInternalSecret = config.getOrThrow('JWT_INTERNAL_SECRET');
   }
 
   private generateInternalToken(): string {
@@ -68,15 +71,22 @@ export class TransactionsClientService {
   async getTransactions(
     userId: string,
     type?: string,
-  ): Promise<TransactionResponseDto[]> {
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedTransactionsResponse> {
     try {
       this.logger.log(`Fetching transactions for user ${userId}`);
       const response = await firstValueFrom(
-        this.httpService.get<TransactionResponseDto[]>(
+        this.httpService.get<PaginatedTransactionsResponse>(
           `${this.msTransactionsUrl}/transactions`,
           {
             headers: this.getAuthHeaders(),
-            params: { user_id: userId, ...(type && { type }) },
+            params: {
+              user_id: userId,
+              ...(type && { type }),
+              page,
+              limit,
+            },
             timeout: 5000,
           },
         ),
@@ -125,6 +135,8 @@ export class TransactionsClientService {
         const message = data?.message || error.message;
 
         if (status === 400) throw new BadRequestException({ code, message });
+        if (status === 401) throw new UnauthorizedException({ code, message });
+        if (status === 403) throw new ForbiddenException({ code, message });
         if (status === 404) throw new NotFoundException({ code, message });
         if (status === 409) throw new ConflictException({ code, message });
         if (status === 429)

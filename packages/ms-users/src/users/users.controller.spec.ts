@@ -10,7 +10,6 @@ describe('UsersController', () => {
 
   const mockUsersService = {
     create: jest.fn(),
-    findAll: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
@@ -74,19 +73,10 @@ describe('UsersController', () => {
       const result = await controller.getCurrentUser(currentUser);
 
       expect(result).toEqual(mockUser);
-      expect(service.findOne).toHaveBeenCalledWith(currentUser.userId);
-    });
-  });
-
-  describe('findAll', () => {
-    it('should return all users', async () => {
-      const users = [mockUser];
-      mockUsersService.findAll.mockResolvedValue(users);
-
-      const result = await controller.findAll();
-
-      expect(result).toEqual(users);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(service.findOne).toHaveBeenCalledWith(
+        currentUser.userId,
+        currentUser.userId,
+      );
     });
   });
 

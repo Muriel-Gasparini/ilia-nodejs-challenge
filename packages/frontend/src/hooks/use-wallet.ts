@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/stores/auth.store';
@@ -7,6 +7,7 @@ import type {
   Transaction,
   TransactionType,
   CreateTransactionRequest,
+  PaginatedResponse,
 } from '@/types/api';
 
 export function useBalance() {
@@ -23,17 +24,23 @@ export function useBalance() {
   });
 }
 
-export function useTransactions(type?: TransactionType) {
+export function useTransactions(type?: TransactionType, page = 1, limit = 20) {
   const user = useAuthStore((s) => s.user);
 
   return useQuery({
-    queryKey: ['transactions', user?.id, type],
+    queryKey: ['transactions', user?.id, type, page, limit],
     queryFn: async () => {
-      const params = type ? `?type=${type}` : '';
-      const res = await api.get<Transaction[]>(`/users/${user!.id}/wallet/transactions${params}`);
+      const params = new URLSearchParams();
+      if (type) params.set('type', type);
+      params.set('page', String(page));
+      params.set('limit', String(limit));
+      const res = await api.get<PaginatedResponse<Transaction>>(
+        `/users/${user!.id}/wallet/transactions?${params.toString()}`,
+      );
       return res.data;
     },
     enabled: !!user,
+    placeholderData: keepPreviousData,
   });
 }
 

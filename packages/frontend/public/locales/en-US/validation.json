@@ -1,0 +1,9 @@
+{
+  "required": "This field is required",
+  "invalidEmail": "Please enter a valid email",
+  "minLength": "Must be at least {{min}} characters",
+  "passwordMismatch": "Passwords do not match",
+  "minAmount": "Minimum amount is R$ 0.01",
+  "maxAmount": "Maximum amount is R$ 999,999,999.99",
+  "invalidAmount": "Please enter a valid amount"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Dashboard",
+  "balance": "Balance",
+  "recentTransactions": "Recent Transactions",
+  "viewAll": "View all",
+  "quickActions": "Quick Actions",
+  "addFunds": "Add Funds",
+  "sendMoney": "Send Money",
+  "noTransactions": "No transactions yet",
+  "noTransactionsDescription": "Start by adding funds to your wallet"
+}

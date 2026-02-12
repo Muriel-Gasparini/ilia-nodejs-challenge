@@ -1,0 +1,11 @@
+{
+  "title": "Dashboard",
+  "balance": "Saldo",
+  "recentTransactions": "Transacoes Recentes",
+  "viewAll": "Ver todas",
+  "quickActions": "Acoes Rapidas",
+  "addFunds": "Depositar",
+  "sendMoney": "Transferir",
+  "noTransactions": "Nenhuma transacao ainda",
+  "noTransactionsDescription": "Comece adicionando fundos a sua carteira"
+}

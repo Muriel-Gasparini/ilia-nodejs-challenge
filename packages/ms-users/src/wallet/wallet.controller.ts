@@ -7,8 +7,10 @@ import {
   Query,
   UseGuards,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TransactionsClientService } from '../transactions-client/transactions-client.service';
+import { UsersService } from '../users/users.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -16,14 +18,28 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @Controller('users/:userId/wallet')
 @UseGuards(JwtAuthGuard)
 export class WalletController {
-  constructor(private readonly transactionsClient: TransactionsClientService) {}
+  constructor(
+    private readonly transactionsClient: TransactionsClientService,
+    private readonly usersService: UsersService,
+  ) {}
 
-  private validateOwnership(
+  private async validateOwnership(
     authenticatedUserId: string,
     requestedUserId: string,
   ) {
     if (authenticatedUserId !== requestedUserId) {
-      throw new ForbiddenException('You can only access your own wallet');
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'You can only access your own wallet',
+      });
+    }
+
+    const exists = await this.usersService.exists(requestedUserId);
+    if (!exists) {
+      throw new UnauthorizedException({
+        code: 'UNAUTHORIZED',
+        message: 'User no longer exists',
+      });
     }
   }
 
@@ -32,7 +48,7 @@ export class WalletController {
     @CurrentUser() user: { userId: string },
     @Param('userId') userId: string,
   ) {
-    this.validateOwnership(user.userId, userId);
+    await this.validateOwnership(user.userId, userId);
     return this.transactionsClient.getBalance(userId);
   }
 
@@ -42,7 +58,7 @@ export class WalletController {
     @Param('userId') userId: string,
     @Query('type') type?: string,
   ) {
-    this.validateOwnership(user.userId, userId);
+    await this.validateOwnership(user.userId, userId);
     return this.transactionsClient.getTransactions(userId, type);
   }
 
@@ -52,7 +68,7 @@ export class WalletController {
     @Param('userId') userId: string,
     @Body() createTransactionDto: CreateTransactionDto,
   ) {
-    this.validateOwnership(user.userId, userId);
+    await this.validateOwnership(user.userId, userId);
     return this.transactionsClient.createTransaction({
       user_id: userId,
       amount: createTransactionDto.amount,

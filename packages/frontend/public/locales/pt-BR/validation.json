@@ -1,0 +1,9 @@
+{
+  "required": "Este campo e obrigatorio",
+  "invalidEmail": "Digite um email valido",
+  "minLength": "Deve ter no minimo {{min}} caracteres",
+  "passwordMismatch": "As senhas nao conferem",
+  "minAmount": "Valor minimo e R$ 0,01",
+  "maxAmount": "Valor maximo e R$ 999.999.999,99",
+  "invalidAmount": "Digite um valor valido"
+}

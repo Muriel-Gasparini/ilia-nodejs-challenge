@@ -47,6 +47,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-users:5432/users_db
       JWT_SECRET: ${JWT_SECRET}
       JWT_INTERNAL_SECRET: ${JWT_INTERNAL_SECRET}
+      MS_TRANSACTIONS_URL: http://ms-transactions:3001
       NODE_ENV: production
     ports:
       - "3002:3002"
@@ -89,6 +90,19 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    container_name: ilia-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      ms-users:
+        condition: service_healthy
+    networks:
+      - ilia-network
 
 networks:
   ilia-network:

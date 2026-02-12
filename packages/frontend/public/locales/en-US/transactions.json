@@ -1,0 +1,16 @@
+{
+  "title": "Transactions",
+  "all": "All",
+  "credit": "Credit",
+  "debit": "Debit",
+  "newTransaction": "New Transaction",
+  "amount": "Amount",
+  "type": "Type",
+  "create": "Create Transaction",
+  "creating": "Creating...",
+  "success": "Transaction created successfully",
+  "insufficientFunds": "Insufficient funds",
+  "noTransactions": "No transactions found",
+  "noCredits": "No credit transactions",
+  "noDebits": "No debit transactions"
+}

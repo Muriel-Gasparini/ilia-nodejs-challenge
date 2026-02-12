@@ -1,6 +1,10 @@
 import {
   Injectable,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+  HttpException,
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -109,31 +113,35 @@ export class TransactionsClientService {
 
     if (error instanceof AxiosError) {
       if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-        throw new ServiceUnavailableException(
-          'MS-Transactions service is unavailable',
-        );
+        throw new ServiceUnavailableException({
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Transaction service is unavailable',
+        });
       }
 
       if (error.response) {
-        const status = error.response.status;
-        const message = error.response.data?.message || error.message;
+        const { status, data } = error.response;
+        const code = data?.code || 'INTERNAL_ERROR';
+        const message = data?.message || error.message;
 
-        if (status >= 400 && status < 500) {
-          throw new InternalServerErrorException(
-            `MS-Transactions returned error: ${message}`,
-          );
-        }
+        if (status === 400) throw new BadRequestException({ code, message });
+        if (status === 404) throw new NotFoundException({ code, message });
+        if (status === 409) throw new ConflictException({ code, message });
+        if (status === 429)
+          throw new HttpException({ code: 'RATE_LIMITED', message }, 429);
 
         if (status >= 500) {
-          throw new ServiceUnavailableException(
-            'MS-Transactions service error',
-          );
+          throw new ServiceUnavailableException({
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Transaction service error',
+          });
         }
       }
     }
 
-    throw new InternalServerErrorException(
-      'Unexpected error communicating with MS-Transactions',
-    );
+    throw new InternalServerErrorException({
+      code: 'INTERNAL_ERROR',
+      message: 'Unexpected error',
+    });
   }
 }

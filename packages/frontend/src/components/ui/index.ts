@@ -9,5 +9,6 @@ export { Dialog, DialogContent, DialogTrigger, DialogClose } from './Dialog';
 export { Select } from './Select';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
+export { FormFeedback } from './FormFeedback';
 export { ThemeToggle } from './ThemeToggle';
 export { LanguageSwitcher } from './LanguageSwitcher';

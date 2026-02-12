@@ -11,11 +11,12 @@
     "docker:logs": "docker compose logs -f",
     "docker:prod": "docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build",
     "docker:prod:down": "docker compose -f docker-compose.prod.yml --env-file .env.prod down 2>/dev/null || docker compose -f docker-compose.prod.yml down",
+    "db:generate": "npm run prisma:generate --workspace=ms-users && npm run prisma:generate --workspace=ms-transactions",
     "db:migrate": "npm run prisma:migrate --workspace=ms-users && npm run prisma:migrate --workspace=ms-transactions",
     "dev:users": "npm run start:dev --workspace=ms-users",
     "dev:transactions": "npm run start:dev --workspace=ms-transactions",
     "dev:frontend": "npm run dev --workspace=frontend",
-    "dev": "npm run dev:users & npm run dev:transactions & npm run dev:frontend",
+    "dev": "concurrently -n users,transactions,frontend -c blue,magenta,green \"npm:dev:users\" \"npm:dev:transactions\" \"npm:dev:frontend\"",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "test:e2e": "npm run test:e2e --workspaces",
@@ -37,7 +38,11 @@
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
+  "overrides": {
+    "glob": "^13.0.0"
+  },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7"
   }

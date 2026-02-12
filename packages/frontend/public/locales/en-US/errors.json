@@ -1,0 +1,14 @@
+{
+  "INVALID_CREDENTIALS": "Invalid email or password",
+  "EMAIL_EXISTS": "This email is already registered",
+  "FORBIDDEN": "You don't have permission to perform this action",
+  "INSUFFICIENT_FUNDS": "Insufficient funds for this transaction",
+  "DUPLICATE_RESOURCE": "This transaction has already been processed",
+  "VALIDATION_ERROR": "Please check the form fields",
+  "RATE_LIMITED": "Too many attempts. Please wait and try again",
+  "SERVICE_UNAVAILABLE": "Service temporarily unavailable. Please try again",
+  "UNAUTHORIZED": "Your session has expired. Please log in again",
+  "RESOURCE_NOT_FOUND": "The requested resource was not found",
+  "INTERNAL_ERROR": "An unexpected error occurred",
+  "UNKNOWN": "An unexpected error occurred"
+}

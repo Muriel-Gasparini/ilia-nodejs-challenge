@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, Card, useToast } from '@/components/ui';
 import { useCurrentUser, useUpdateUser } from '@/hooks/use-user';
+import { getErrorMessage } from '@/lib/errors';
 
 const profileSchema = z.object({
   first_name: z.string().min(1, 'validation:required'),
@@ -46,8 +47,8 @@ export function ProfileForm() {
         toast(t('profile:updateSuccess'), 'success');
         setEditing(false);
       },
-      onError: () => {
-        toast(t('unexpectedError'), 'error');
+      onError: (error) => {
+        toast(getErrorMessage(error), 'error');
       },
     });
   };

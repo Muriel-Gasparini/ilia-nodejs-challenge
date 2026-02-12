@@ -56,6 +56,7 @@ export interface CreateTransactionRequest {
 
 export interface ApiError {
   statusCode: number;
+  code: string;
   message: string | string[];
   error?: string;
 }

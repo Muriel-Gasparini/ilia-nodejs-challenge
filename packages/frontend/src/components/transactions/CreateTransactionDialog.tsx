@@ -2,13 +2,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { AxiosError } from 'axios';
 import { Dialog, DialogContent, Button, Input, useToast } from '@/components/ui';
 import { useCreateTransaction } from '@/hooks/use-wallet';
-import type { TransactionType, ApiError } from '@/types/api';
+import { getErrorMessage } from '@/lib/errors';
+import type { TransactionType } from '@/types/api';
 
 const transactionSchema = z.object({
-  amount: z.coerce.number().min(0.01, 'validation:minAmount'),
+  amount: z.coerce
+    .number()
+    .min(0.01, 'validation:minAmount')
+    .max(999_999_999.99, 'validation:maxAmount'),
 });
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -47,12 +50,7 @@ export function CreateTransactionDialog({
           onOpenChange(false);
         },
         onError: (error) => {
-          const err = error as AxiosError<ApiError>;
-          if (err.response?.status === 400) {
-            toast(t('transactions:insufficientFunds'), 'error');
-          } else {
-            toast(t('unexpectedError'), 'error');
-          }
+          toast(getErrorMessage(error), 'error');
         },
       },
     );
@@ -60,25 +58,29 @@ export function CreateTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent title={t('transactions:newTransaction')}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div className="flex items-center justify-center gap-2 rounded-[var(--radius-input)] bg-[var(--bg-tertiary)] py-2">
+      <DialogContent
+        title={
+          <span className="flex items-center gap-2">
+            {t('transactions:newTransaction')}
             <span
-              className={`rounded-[var(--radius-pill)] px-4 py-1.5 text-sm font-semibold ${
+              className={`rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-semibold ${
                 defaultType === 'CREDIT'
-                  ? 'bg-primary-400 text-white'
-                  : 'bg-error-400 text-white'
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-400/15 dark:text-primary-400'
+                  : 'bg-error-50 text-error-600 dark:bg-error-400/15 dark:text-error-400'
               }`}
             >
               {t(`transactions:${defaultType.toLowerCase()}`)}
             </span>
-          </div>
-
+          </span>
+        }
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input
             id="amount"
             type="number"
             step="0.01"
             min="0.01"
+            max="999999999.99"
             label={t('transactions:amount')}
             placeholder="0.00"
             error={errors.amount ? t(errors.amount.message!) : undefined}
@@ -91,9 +93,7 @@ export function CreateTransactionDialog({
             isLoading={createTransaction.isPending}
             className="w-full"
           >
-            {createTransaction.isPending
-              ? t('transactions:creating')
-              : t('transactions:create')}
+            {createTransaction.isPending ? t('transactions:creating') : t('transactions:create')}
           </Button>
         </form>
       </DialogContent>

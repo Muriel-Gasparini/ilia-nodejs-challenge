@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Button, Input, Card, useToast } from '@/components/ui';
 import { useUpdateUser } from '@/hooks/use-user';
+import { getErrorMessage } from '@/lib/errors';
 
 const passwordSchema = z
   .object({
@@ -39,8 +40,8 @@ export function ChangePasswordForm() {
           toast(t('profile:passwordSuccess'), 'success');
           reset();
         },
-        onError: () => {
-          toast(t('unexpectedError'), 'error');
+        onError: (error) => {
+          toast(getErrorMessage(error), 'error');
         },
       },
     );

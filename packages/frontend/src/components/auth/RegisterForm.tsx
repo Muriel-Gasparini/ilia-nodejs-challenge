@@ -3,10 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { AxiosError } from 'axios';
 import { Button, Input, Card } from '@/components/ui';
 import { useRegister } from '@/hooks/use-auth';
-import type { ApiError } from '@/types/api';
+import { getErrorMessage } from '@/lib/errors';
 
 const registerSchema = z
   .object({
@@ -41,13 +40,7 @@ export function RegisterForm() {
     registerMutation.mutate(payload);
   };
 
-  const getErrorMessage = () => {
-    if (!registerMutation.error) return null;
-    const err = registerMutation.error as AxiosError<ApiError>;
-    if (err.response?.status === 409) return t('auth:emailExists');
-    if (err.response?.status === 429) return t('auth:rateLimited');
-    return t('unexpectedError');
-  };
+  const errorMessage = registerMutation.error ? getErrorMessage(registerMutation.error) : null;
 
   return (
     <Card variant="elevated" className="p-8">
@@ -55,7 +48,7 @@ export function RegisterForm() {
 
       {registerMutation.error && (
         <div className="mb-4 rounded-[var(--radius-input)] bg-error-50 p-3 text-center text-sm text-error-500 dark:bg-error-400/10">
-          {getErrorMessage()}
+          {errorMessage}
         </div>
       )}
 
@@ -110,7 +103,10 @@ export function RegisterForm() {
 
       <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
         {t('auth:hasAccount')}{' '}
-        <Link to="/login" className="font-medium text-primary-400 hover:underline">
+        <Link
+          to="/login"
+          className="font-medium text-primary-600 hover:underline dark:text-primary-400"
+        >
           {t('auth:signIn')}
         </Link>
       </p>

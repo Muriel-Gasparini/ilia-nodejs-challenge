@@ -3,10 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { AxiosError } from 'axios';
 import { Button, Input, Card } from '@/components/ui';
 import { useLogin } from '@/hooks/use-auth';
-import type { ApiError } from '@/types/api';
+import { getErrorMessage } from '@/lib/errors';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'validation:required').email('validation:invalidEmail'),
@@ -31,13 +30,7 @@ export function LoginForm() {
     login.mutate(data);
   };
 
-  const getErrorMessage = () => {
-    if (!login.error) return null;
-    const err = login.error as AxiosError<ApiError>;
-    if (err.response?.status === 401) return t('auth:invalidCredentials');
-    if (err.response?.status === 429) return t('auth:rateLimited');
-    return t('unexpectedError');
-  };
+  const errorMessage = login.error ? getErrorMessage(login.error) : null;
 
   return (
     <Card variant="elevated" className="p-8">
@@ -45,7 +38,7 @@ export function LoginForm() {
 
       {login.error && (
         <div className="mb-4 rounded-[var(--radius-input)] bg-error-50 p-3 text-center text-sm text-error-500 dark:bg-error-400/10">
-          {getErrorMessage()}
+          {errorMessage}
         </div>
       )}
 
@@ -73,7 +66,10 @@ export function LoginForm() {
 
       <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
         {t('auth:noAccount')}{' '}
-        <Link to="/register" className="font-medium text-primary-400 hover:underline">
+        <Link
+          to="/register"
+          className="font-medium text-primary-600 hover:underline dark:text-primary-400"
+        >
           {t('auth:signUp')}
         </Link>
       </p>

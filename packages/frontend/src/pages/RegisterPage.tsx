@@ -1,3 +1,10 @@
+import { AuthLayout } from '@/components/layout';
+import { RegisterForm } from '@/components/auth';
+
 export default function RegisterPage() {
-  return <div>Register</div>;
+  return (
+    <AuthLayout>
+      <RegisterForm />
+    </AuthLayout>
+  );
 }

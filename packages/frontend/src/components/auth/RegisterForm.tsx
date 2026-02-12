@@ -1,0 +1,113 @@
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
+import { AxiosError } from 'axios';
+import { Button, Input, Card } from '@/components/ui';
+import { useRegister } from '@/hooks/use-auth';
+import type { ApiError } from '@/types/api';
+
+const registerSchema = z
+  .object({
+    first_name: z.string().min(1, 'validation:required'),
+    last_name: z.string().min(1, 'validation:required'),
+    email: z.string().min(1, 'validation:required').email('validation:invalidEmail'),
+    password: z.string().min(6, 'validation:minLength'),
+    confirm_password: z.string().min(1, 'validation:required'),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: 'validation:passwordMismatch',
+    path: ['confirm_password'],
+  });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+export function RegisterForm() {
+  const { t } = useTranslation();
+  const registerMutation = useRegister();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = (data: RegisterFormData) => {
+    const { confirm_password: _, ...payload } = data;
+    registerMutation.mutate(payload);
+  };
+
+  const getErrorMessage = () => {
+    if (!registerMutation.error) return null;
+    const err = registerMutation.error as AxiosError<ApiError>;
+    if (err.response?.status === 409) return t('auth:emailExists');
+    if (err.response?.status === 429) return t('auth:rateLimited');
+    return t('unexpectedError');
+  };
+
+  return (
+    <Card variant="elevated" className="p-8">
+      <h2 className="mb-6 text-center text-xl font-semibold">{t('auth:signUp')}</h2>
+
+      {registerMutation.error && (
+        <div className="mb-4 rounded-[var(--radius-input)] bg-error-50 p-3 text-center text-sm text-error-500 dark:bg-error-400/10">
+          {getErrorMessage()}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            id="first_name"
+            label={t('auth:firstName')}
+            error={errors.first_name ? t(errors.first_name.message!) : undefined}
+            {...register('first_name')}
+          />
+          <Input
+            id="last_name"
+            label={t('auth:lastName')}
+            error={errors.last_name ? t(errors.last_name.message!) : undefined}
+            {...register('last_name')}
+          />
+        </div>
+        <Input
+          id="email"
+          type="email"
+          label={t('auth:email')}
+          placeholder="email@example.com"
+          error={errors.email ? t(errors.email.message!) : undefined}
+          {...register('email')}
+        />
+        <Input
+          id="password"
+          type="password"
+          label={t('auth:password')}
+          placeholder="••••••"
+          error={errors.password ? t(errors.password.message!, { min: 6 }) : undefined}
+          {...register('password')}
+        />
+        <Input
+          id="confirm_password"
+          type="password"
+          label={t('auth:confirmPassword')}
+          placeholder="••••••"
+          error={errors.confirm_password ? t(errors.confirm_password.message!) : undefined}
+          {...register('confirm_password')}
+        />
+        <Button type="submit" size="lg" isLoading={registerMutation.isPending} className="mt-2 w-full">
+          {t('auth:signUp')}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
+        {t('auth:hasAccount')}{' '}
+        <Link to="/login" className="font-medium text-primary-400 hover:underline">
+          {t('auth:signIn')}
+        </Link>
+      </p>
+    </Card>
+  );
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Transacoes",
+  "all": "Todas",
+  "credit": "Credito",
+  "debit": "Debito",
+  "newTransaction": "Nova Transacao",
+  "amount": "Valor",
+  "type": "Tipo",
+  "create": "Criar Transacao",
+  "creating": "Criando...",
+  "success": "Transacao criada com sucesso",
+  "insufficientFunds": "Saldo insuficiente",
+  "noTransactions": "Nenhuma transacao encontrada",
+  "noCredits": "Nenhuma transacao de credito",
+  "noDebits": "Nenhuma transacao de debito"
+}

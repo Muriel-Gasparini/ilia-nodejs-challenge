@@ -1,0 +1,14 @@
+{
+  "appName": "ilia Wallet",
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "back": "Back",
+  "pageNotFound": "Page not found",
+  "goHome": "Go to Dashboard",
+  "unexpectedError": "An unexpected error occurred",
+  "tryAgain": "Try again"
+}

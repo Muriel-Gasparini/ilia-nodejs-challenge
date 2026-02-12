@@ -1,0 +1,9 @@
+{
+  "title": "Perfil",
+  "personalInfo": "Informacoes Pessoais",
+  "changePassword": "Alterar Senha",
+  "newPassword": "Nova senha",
+  "confirmNewPassword": "Confirmar nova senha",
+  "updateSuccess": "Perfil atualizado com sucesso",
+  "passwordSuccess": "Senha alterada com sucesso"
+}

@@ -76,8 +76,13 @@ export const handlers = [
   http.get('/api/users/:userId/wallet/transactions', ({ request }) => {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
+    const page = Number(url.searchParams.get('page') ?? 1);
+    const limit = Number(url.searchParams.get('limit') ?? 20);
     const filtered = type ? mockTransactions.filter((t) => t.type === type) : mockTransactions;
-    return HttpResponse.json(filtered);
+    return HttpResponse.json({
+      data: filtered,
+      meta: { total: filtered.length, page, limit, totalPages: 1 },
+    });
   }),
 
   http.post('/api/users/:userId/wallet/transactions', async () => {

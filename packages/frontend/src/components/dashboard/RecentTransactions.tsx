@@ -34,7 +34,7 @@ export function RecentTransactions() {
         <div className="flex flex-col divide-y divide-[var(--border-secondary)]">
           {recent.map((tx) => (
             <div key={tx.id} className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-full ${
                     tx.type === 'CREDIT'
@@ -52,7 +52,7 @@ export function RecentTransactions() {
                 </div>
               </div>
               <span
-                className={`text-sm font-semibold ${
+                className={`shrink-0 text-xs sm:text-sm font-semibold ${
                   tx.type === 'CREDIT'
                     ? 'text-primary-600 dark:text-primary-400'
                     : 'text-error-500 dark:text-error-400'

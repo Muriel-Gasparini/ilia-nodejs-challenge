@@ -18,7 +18,9 @@ function applyTheme(theme: Theme) {
   const root = document.documentElement;
   const isDark = theme === 'dark' || (theme === 'system' && (getMediaQuery()?.matches ?? false));
 
+  root.classList.add('theme-transition');
   root.classList.toggle('dark', isDark);
+  setTimeout(() => root.classList.remove('theme-transition'), 300);
 }
 
 export const useThemeStore = create<ThemeState>()(

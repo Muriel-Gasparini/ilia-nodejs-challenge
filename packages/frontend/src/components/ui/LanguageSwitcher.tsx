@@ -4,8 +4,22 @@ export function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
   const toggle = () => {
-    const next = i18n.language === 'pt-BR' ? 'en-US' : 'pt-BR';
-    i18n.changeLanguage(next);
+    const els = document.querySelectorAll('h1,h2,h3,p,span,a,button,label,th,td,li');
+    const before = new Map<Element, string>();
+    els.forEach((el) => before.set(el, el.textContent ?? ''));
+
+    i18n.changeLanguage(i18n.language === 'pt-BR' ? 'en-US' : 'pt-BR');
+
+    setTimeout(() => {
+      before.forEach((old, el) => {
+        if (el.isConnected && el.textContent !== old) {
+          el.classList.add('lang-settle');
+          el.addEventListener('animationend', () => el.classList.remove('lang-settle'), {
+            once: true,
+          });
+        }
+      });
+    }, 50);
   };
 
   return (

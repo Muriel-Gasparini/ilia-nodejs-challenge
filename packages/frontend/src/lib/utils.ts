@@ -14,12 +14,15 @@ export function formatCurrency(value: number, locale = 'pt-BR'): string {
   }).format(value);
 }
 
-export function formatDate(date: string | Date, locale = 'pt-BR'): string {
+export function formatDate(date: string | Date | undefined, locale = 'pt-BR'): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '-';
   return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(date));
+  }).format(d);
 }

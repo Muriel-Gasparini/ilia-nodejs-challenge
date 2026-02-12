@@ -120,6 +120,8 @@ export class TransactionsService {
         user_id: true,
         amount: true,
         type: true,
+        idempotency_key: true,
+        created_at: true,
       },
       orderBy: {
         created_at: 'desc',

@@ -127,8 +127,15 @@ export function TransactionList({ filter }: TransactionListProps) {
     setPage((p) => p + 1);
   };
 
+  const slideClass =
+    direction === 'next'
+      ? 'animate-slide-in-right'
+      : direction === 'prev'
+        ? 'animate-slide-in-left'
+        : '';
+
   return (
-    <Card>
+    <Card className="overflow-x-hidden">
       {hasPagination && (
         <div className="mb-4 border-b border-[var(--border-secondary)] pb-4">
           <PaginationBar
@@ -142,7 +149,10 @@ export function TransactionList({ filter }: TransactionListProps) {
         </div>
       )}
 
-      <div className="flex flex-col divide-y divide-[var(--border-secondary)]">
+      <div
+        key={page}
+        className={`flex flex-col divide-y divide-[var(--border-secondary)] ${slideClass}`}
+      >
         {transactions.map((tx) => (
           <TransactionItem key={tx.id} transaction={tx} />
         ))}

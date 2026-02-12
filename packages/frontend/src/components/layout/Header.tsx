@@ -34,7 +34,7 @@ export function Header() {
 
           <DropdownMenu.Portal>
             <DropdownMenu.Content
-              className="z-50 min-w-[160px] rounded-[var(--radius-input)] border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-1 shadow-lg"
+              className="z-50 min-w-[160px] rounded-[var(--radius-input)] border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-1 shadow-lg data-[state=open]:animate-dropdown-in data-[state=closed]:animate-dropdown-out"
               sideOffset={4}
               align="end"
             >

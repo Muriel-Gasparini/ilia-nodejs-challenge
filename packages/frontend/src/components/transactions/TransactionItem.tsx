@@ -37,7 +37,7 @@ export function TransactionItem({ transaction: tx }: TransactionItemProps) {
         }`}
       >
         {tx.type === 'CREDIT' ? '+' : '-'}
-        {formatCurrency(tx.amount, i18n.language)}
+        {formatCurrency(tx.amount)}
       </span>
     </div>
   );

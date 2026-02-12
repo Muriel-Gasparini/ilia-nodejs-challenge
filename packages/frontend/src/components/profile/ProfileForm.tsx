@@ -31,7 +31,7 @@ export function ProfileForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     mode: 'onChange',
@@ -83,9 +83,11 @@ export function ProfileForm() {
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold">{t('profile:personalInfo')}</h3>
         {!editing && (
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            {t('edit')}
-          </Button>
+          <div className="animate-fade-in">
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              {t('edit')}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -126,11 +128,11 @@ export function ProfileForm() {
         />
 
         {editing && (
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 animate-fade-in">
             <Button variant="ghost" type="button" onClick={onCancel}>
               {t('cancel')}
             </Button>
-            <Button type="submit" isLoading={updateUser.isPending}>
+            <Button type="submit" disabled={!isValid} isLoading={updateUser.isPending}>
               {t('save')}
             </Button>
           </div>

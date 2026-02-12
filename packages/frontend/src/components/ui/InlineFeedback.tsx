@@ -70,24 +70,33 @@ export function InlineFeedback({
   onDismiss,
 }: InlineFeedbackProps) {
   const [visible, setVisible] = useState(true);
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     if (autoDismissMs > 0) {
       const timer = setTimeout(() => {
-        setVisible(false);
-        onDismiss?.();
+        setLeaving(true);
       }, autoDismissMs);
       return () => clearTimeout(timer);
     }
-  }, [autoDismissMs, onDismiss]);
+  }, [autoDismissMs]);
+
+  const handleAnimationEnd = () => {
+    if (leaving) {
+      setVisible(false);
+      onDismiss?.();
+    }
+  };
 
   if (!visible) return null;
 
   return (
     <div
       role="status"
+      onAnimationEnd={handleAnimationEnd}
       className={cn(
-        'flex items-center gap-2.5 rounded-[var(--radius-input)] px-4 py-3 text-sm font-medium animate-fade-in-up',
+        'flex items-center gap-2.5 rounded-[var(--radius-input)] px-4 py-3 text-sm font-medium',
+        leaving ? 'animate-fade-out-down' : 'animate-fade-in-up',
         variantStyles[variant],
         className,
       )}

@@ -6,19 +6,27 @@ import {
   TransactionList,
   CreateTransactionDialog,
 } from '@/components/transactions';
+import { useBalance } from '@/hooks/use-wallet';
 import type { TransactionType } from '@/types/api';
 
 export default function TransactionsPage() {
   const { t } = useTranslation('transactions');
+  const { data: balanceData } = useBalance();
   const [filter, setFilter] = useState('ALL');
   const [dialogType, setDialogType] = useState<TransactionType | null>(null);
+  const hasBalance = (balanceData?.balance ?? 0) > 0;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setDialogType('DEBIT')}>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!hasBalance}
+            onClick={() => setDialogType('DEBIT')}
+          >
             {t('dashboard:sendMoney')}
           </Button>
           <Button size="sm" onClick={() => setDialogType('CREDIT')}>

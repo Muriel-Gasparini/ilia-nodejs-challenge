@@ -1,4 +1,4 @@
-.PHONY: help dev dev-frontend up down prod prod-down logs install migrate test clean
+.PHONY: help dev dev-frontend up down prod prod-down logs install migrate test clean db-reset
 
 help:
 	@echo "Available commands:"
@@ -13,6 +13,7 @@ help:
 	@echo "  make prod         - Start production (full Docker)"
 	@echo "  make prod-down    - Stop production"
 	@echo "  make logs         - View docker logs"
+	@echo "  make db-reset     - Wipe database data and re-run migrations"
 	@echo "  make clean        - Remove all containers and volumes"
 
 install:
@@ -57,6 +58,10 @@ prod-down:
 
 logs:
 	docker compose logs -f
+
+db-reset:
+	docker compose down -v
+	@$(MAKE) migrate
 
 clean:
 	docker compose down -v

@@ -87,6 +87,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev, { id, message, variant }]);
   }, []);
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { message, variant } = (e as CustomEvent).detail;
+      addToast(message, variant);
+    };
+    window.addEventListener('app:toast', handler);
+    return () => window.removeEventListener('app:toast', handler);
+  }, [addToast]);
+
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);

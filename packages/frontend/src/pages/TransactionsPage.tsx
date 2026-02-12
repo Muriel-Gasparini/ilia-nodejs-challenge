@@ -6,25 +6,37 @@ import {
   TransactionList,
   CreateTransactionDialog,
 } from '@/components/transactions';
+import type { TransactionType } from '@/types/api';
 
 export default function TransactionsPage() {
   const { t } = useTranslation('transactions');
   const [filter, setFilter] = useState('ALL');
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<TransactionType | null>(null);
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Button onClick={() => setDialogOpen(true)}>{t('newTransaction')}</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={() => setDialogType('DEBIT')}>
+            {t('dashboard:sendMoney')}
+          </Button>
+          <Button size="sm" onClick={() => setDialogType('CREDIT')}>
+            {t('dashboard:addFunds')}
+          </Button>
+        </div>
       </div>
       <TransactionFilters value={filter} onChange={setFilter} />
       <TransactionList filter={filter} />
-      <CreateTransactionDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        defaultType="CREDIT"
-      />
+      {dialogType && (
+        <CreateTransactionDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setDialogType(null);
+          }}
+          defaultType={dialogType}
+        />
+      )}
     </div>
   );
 }

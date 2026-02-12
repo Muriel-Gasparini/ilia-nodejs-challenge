@@ -62,7 +62,7 @@ export function CreateTransactionDialog({
 
   const formatNumber = (val: string): string => {
     if (!val) return '';
-    const [int, dec] = val.split('.');
+    const [int = '', dec] = val.split('.');
     const formatted = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return dec !== undefined ? `${formatted}.${dec}` : formatted;
   };

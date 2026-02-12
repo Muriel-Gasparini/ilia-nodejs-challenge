@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, Button, Skeleton, EmptyState, ErrorState } from '@/components/ui';
 import { useTransactions } from '@/hooks/use-wallet';
 import { TransactionItem } from './TransactionItem';
-import type { TransactionType } from '@/types/api';
+import type { TransactionType, PaginationMeta } from '@/types/api';
 
 interface TransactionListProps {
   filter: string;
@@ -11,9 +11,62 @@ interface TransactionListProps {
 
 const PAGE_SIZE = 20;
 
+type PageDirection = 'next' | 'prev' | null;
+
+function PaginationBar({
+  meta,
+  page,
+  isFetching,
+  direction,
+  onPrev,
+  onNext,
+}: {
+  meta: PaginationMeta;
+  page: number;
+  isFetching: boolean;
+  direction: PageDirection;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const { t } = useTranslation('transactions');
+
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-[var(--text-tertiary)]">
+        {t('paginationInfo', {
+          from: (meta.page - 1) * meta.limit + 1,
+          to: Math.min(meta.page * meta.limit, meta.total),
+          total: meta.total,
+        })}
+      </span>
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={page <= 1 || isFetching}
+          isLoading={isFetching && direction === 'prev'}
+          onClick={onPrev}
+        >
+          {t('previous')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={page >= meta.totalPages || isFetching}
+          isLoading={isFetching && direction === 'next'}
+          onClick={onNext}
+        >
+          {t('next')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function TransactionList({ filter }: TransactionListProps) {
   const { t } = useTranslation('transactions');
   const [page, setPage] = useState(1);
+  const [direction, setDirection] = useState<PageDirection>(null);
   const type = filter === 'ALL' ? undefined : (filter as TransactionType);
   const {
     data: response,
@@ -64,41 +117,47 @@ export function TransactionList({ filter }: TransactionListProps) {
     );
   }
 
+  const hasPagination = meta && meta.totalPages > 1;
+  const prevPage = () => {
+    setDirection('prev');
+    setPage((p) => p - 1);
+  };
+  const nextPage = () => {
+    setDirection('next');
+    setPage((p) => p + 1);
+  };
+
   return (
     <Card>
+      {hasPagination && (
+        <div className="mb-4 border-b border-[var(--border-secondary)] pb-4">
+          <PaginationBar
+            meta={meta}
+            page={page}
+            isFetching={isFetching}
+            direction={direction}
+            onPrev={prevPage}
+            onNext={nextPage}
+          />
+        </div>
+      )}
+
       <div className="flex flex-col divide-y divide-[var(--border-secondary)]">
         {transactions.map((tx) => (
           <TransactionItem key={tx.id} transaction={tx} />
         ))}
       </div>
 
-      {meta && meta.totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between border-t border-[var(--border-secondary)] pt-4">
-          <span className="text-sm text-[var(--text-tertiary)]">
-            {t('paginationInfo', {
-              from: (meta.page - 1) * meta.limit + 1,
-              to: Math.min(meta.page * meta.limit, meta.total),
-              total: meta.total,
-            })}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={page <= 1 || isFetching}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              {t('previous')}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={page >= meta.totalPages || isFetching}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t('next')}
-            </Button>
-          </div>
+      {hasPagination && (
+        <div className="mt-4 border-t border-[var(--border-secondary)] pt-4">
+          <PaginationBar
+            meta={meta}
+            page={page}
+            isFetching={isFetching}
+            direction={direction}
+            onPrev={prevPage}
+            onNext={nextPage}
+          />
         </div>
       )}
     </Card>

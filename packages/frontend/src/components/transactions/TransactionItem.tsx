@@ -12,7 +12,7 @@ export function TransactionItem({ transaction: tx }: TransactionItemProps) {
 
   return (
     <div className="flex items-center justify-between py-3">
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-full text-lg ${
             tx.type === 'CREDIT'
@@ -30,7 +30,7 @@ export function TransactionItem({ transaction: tx }: TransactionItemProps) {
         </div>
       </div>
       <span
-        className={`text-base font-semibold ${
+        className={`shrink-0 text-xs sm:text-base font-semibold ${
           tx.type === 'CREDIT'
             ? 'text-primary-600 dark:text-primary-400'
             : 'text-error-500 dark:text-error-400'

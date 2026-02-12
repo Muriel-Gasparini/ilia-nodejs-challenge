@@ -10,6 +10,7 @@
   "UNAUTHORIZED": "Sua sessão expirou. Faça login novamente",
   "USER_NOT_FOUND": "Usuário não encontrado",
   "RESOURCE_NOT_FOUND": "O recurso solicitado não foi encontrado",
+  "REGISTRATION_FAILED": "Não foi possível completar o cadastro. Se você já tem uma conta, tente fazer login.",
   "INTERNAL_ERROR": "Ocorreu um erro inesperado",
   "UNKNOWN": "Ocorreu um erro inesperado"
 }

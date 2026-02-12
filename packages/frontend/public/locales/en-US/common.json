@@ -10,5 +10,6 @@
   "pageNotFound": "Page not found",
   "goHome": "Go to Dashboard",
   "unexpectedError": "An unexpected error occurred",
-  "tryAgain": "Try again"
+  "tryAgain": "Try again",
+  "close": "OK"
 }

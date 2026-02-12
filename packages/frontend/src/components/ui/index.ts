@@ -4,7 +4,7 @@ export { Card } from './Card';
 export { Badge } from './Badge';
 export { Skeleton } from './Skeleton';
 export { Spinner } from './Spinner';
-export { ToastProvider, useToast } from './Toast';
+export { InlineFeedback } from './InlineFeedback';
 export { Dialog, DialogContent, DialogTrigger, DialogClose } from './Dialog';
 export { Select } from './Select';
 export { EmptyState } from './EmptyState';

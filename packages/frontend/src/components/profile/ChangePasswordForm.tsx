@@ -1,8 +1,9 @@
+import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Card, useToast } from '@/components/ui';
+import { Button, Input, Card, InlineFeedback } from '@/components/ui';
 import { useUpdateUser } from '@/hooks/use-user';
 import { getErrorMessage } from '@/lib/errors';
 
@@ -18,10 +19,15 @@ const passwordSchema = z
 
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
+interface Feedback {
+  variant: 'success' | 'error';
+  message: string;
+}
+
 export function ChangePasswordForm() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const updateUser = useUpdateUser();
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const {
     register,
@@ -30,18 +36,21 @@ export function ChangePasswordForm() {
     formState: { errors },
   } = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
+    mode: 'onChange',
   });
+
+  const clearFeedback = useCallback(() => setFeedback(null), []);
 
   const onSubmit = (data: PasswordFormData) => {
     updateUser.mutate(
       { password: data.password },
       {
         onSuccess: () => {
-          toast(t('profile:passwordSuccess'), 'success');
+          setFeedback({ variant: 'success', message: t('profile:passwordSuccess') });
           reset();
         },
         onError: (error) => {
-          toast(getErrorMessage(error), 'error');
+          setFeedback({ variant: 'error', message: getErrorMessage(error) });
         },
       },
     );
@@ -50,6 +59,16 @@ export function ChangePasswordForm() {
   return (
     <Card>
       <h3 className="mb-4 text-base font-semibold">{t('profile:changePassword')}</h3>
+
+      {feedback && (
+        <InlineFeedback
+          variant={feedback.variant}
+          message={feedback.message}
+          className="mb-4"
+          autoDismissMs={feedback.variant === 'success' ? 5000 : 0}
+          onDismiss={clearFeedback}
+        />
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Input

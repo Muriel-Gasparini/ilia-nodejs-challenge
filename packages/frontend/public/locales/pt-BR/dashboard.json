@@ -7,5 +7,8 @@
   "addFunds": "Depositar",
   "sendMoney": "Transferir",
   "noTransactions": "Nenhuma transação ainda",
-  "noTransactionsDescription": "Comece adicionando fundos à sua carteira"
+  "noTransactionsDescription": "Comece adicionando fundos à sua carteira",
+  "welcomeTitle": "Bem-vindo à sua carteira!",
+  "welcomeDescription": "Faça seu primeiro depósito para começar a usar sua conta.",
+  "welcomeCta": "Fazer primeiro depósito"
 }

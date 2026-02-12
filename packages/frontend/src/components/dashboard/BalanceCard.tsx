@@ -16,7 +16,7 @@ export function BalanceCard() {
         {isLoading ? (
           <Skeleton className="mt-2 h-10 w-48 bg-white/10" />
         ) : (
-          <p className="mt-1 text-4xl font-bold tracking-tight text-primary-400">
+          <p className="mt-1 text-[clamp(1.25rem,5.5vw,2.25rem)] font-bold tracking-tight text-primary-400">
             {formatCurrency(data?.balance ?? 0, i18n.language)}
           </p>
         )}

@@ -4,7 +4,6 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router';
 import { useBalance, useTransactions } from '@/hooks/use-wallet';
 import { useAuthStore } from '@/stores/auth.store';
-import { ToastProvider } from '@/components/ui';
 import type { ReactNode } from 'react';
 
 const mockUser = {
@@ -20,9 +19,7 @@ function wrapper({ children }: { children: ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return (
     <QueryClientProvider client={qc}>
-      <ToastProvider>
-        <BrowserRouter>{children}</BrowserRouter>
-      </ToastProvider>
+      <BrowserRouter>{children}</BrowserRouter>
     </QueryClientProvider>
   );
 }

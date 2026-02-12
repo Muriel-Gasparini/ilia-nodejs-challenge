@@ -33,7 +33,7 @@ export function ChangePasswordForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
     mode: 'onChange',
@@ -88,7 +88,7 @@ export function ChangePasswordForm() {
           {...register('confirm_password')}
         />
         <div className="flex justify-end">
-          <Button type="submit" isLoading={updateUser.isPending}>
+          <Button type="submit" disabled={!isValid} isLoading={updateUser.isPending}>
             {t('profile:changePassword')}
           </Button>
         </div>

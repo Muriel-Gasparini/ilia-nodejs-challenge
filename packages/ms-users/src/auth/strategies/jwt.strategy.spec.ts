@@ -1,4 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 
 describe('JwtStrategy', () => {
@@ -6,7 +7,8 @@ describe('JwtStrategy', () => {
 
   beforeEach(() => {
     process.env.JWT_SECRET = 'test-secret';
-    strategy = new JwtStrategy();
+    const configService = new ConfigService();
+    strategy = new JwtStrategy(configService);
   });
 
   it('should be defined', () => {

@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon2 from 'argon2';
@@ -10,6 +11,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {}
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
@@ -36,13 +38,9 @@ export class AuthService {
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET environment variable is required');
-    }
-
     const payload = { sub: user.id, username: user.email };
     const access_token = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
+      secret: this.config.getOrThrow('JWT_SECRET'),
       expiresIn: '24h',
     });
 

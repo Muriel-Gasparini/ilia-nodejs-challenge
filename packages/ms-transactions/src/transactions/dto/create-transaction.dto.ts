@@ -6,7 +6,7 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { TransactionType } from '@prisma/client';
+import { TransactionType } from '../../../generated/prisma';
 
 export class CreateTransactionDto {
   @IsUUID()

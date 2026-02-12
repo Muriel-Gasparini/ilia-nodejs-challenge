@@ -1,10 +1,13 @@
-.PHONY: help dev dev-frontend up down prod prod-down logs install migrate test clean db-reset
+.PHONY: help setup dev dev-frontend up down prod prod-down logs install migrate test clean db-reset
 
 help:
 	@echo "Available commands:"
+	@echo ""
+	@echo "  make setup        - First-time setup (install, envs, DBs, migrations)"
+	@echo "  make dev          - Start all services in dev mode"
+	@echo ""
 	@echo "  make install      - Install all dependencies"
 	@echo "  make up           - Start databases (development)"
-	@echo "  make dev          - Start all services in dev mode"
 	@echo "  make dev-frontend - Start frontend only"
 	@echo "  make down         - Stop databases"
 	@echo "  make migrate      - Run database migrations"
@@ -16,6 +19,22 @@ help:
 	@echo "  make db-reset     - Wipe database data and re-run migrations"
 	@echo "  make clean        - Remove all containers and volumes"
 
+setup:
+	@echo "Installing dependencies..."
+	npm install
+	@echo "Setting up environment files..."
+	@[ -f packages/ms-users/.env ] || cp packages/ms-users/.env.example packages/ms-users/.env
+	@[ -f packages/ms-transactions/.env ] || cp packages/ms-transactions/.env.example packages/ms-transactions/.env
+	@[ -f packages/frontend/.env ] || cp packages/frontend/.env.example packages/frontend/.env
+	@echo "Starting databases..."
+	docker compose up -d
+	@echo "Waiting for databases..."
+	@sleep 5
+	@echo "Running migrations..."
+	npm run db:migrate
+	@echo ""
+	@echo "Setup complete! Run 'make dev' to start developing."
+
 install:
 	npm install
 
@@ -24,6 +43,7 @@ up:
 	@sleep 3
 
 dev: up
+	npm run db:generate
 	npm run dev
 
 dev-frontend:

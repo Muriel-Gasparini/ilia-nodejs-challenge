@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { GetBalanceDto } from './dto/get-balance.dto';
-import { TransactionType } from '@prisma/client';
+import { TransactionType } from '../../generated/prisma';
 import { JwtOrInternalAuthGuard } from '../auth/guards/jwt-or-internal-auth.guard';
 
 @Controller('transactions')
